@@ -8,7 +8,7 @@ const BottomNav = () => {
   const { totalItems } = useCart();
 
   const tabs = [
-    { label: "Home", icon: Home, path: "/" },
+    { label: "Home", icon: Home, path: "/home" },
     { label: "Categories", icon: LayoutGrid, path: "/categories" },
     { label: "Cart", icon: ShoppingCart, path: "/cart", badge: totalItems },
     { label: "Profile", icon: User, path: "/profile" },
