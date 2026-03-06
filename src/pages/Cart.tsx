@@ -108,7 +108,7 @@ const Cart = () => {
               </span>
             </div>
             <button
-              onClick={() => toast.success("Proceeding to checkout!")}
+              onClick={() => navigate("/checkout")}
               className="w-full gradient-brand text-primary-foreground font-bold text-sm py-3.5 rounded-xl hover:opacity-90 active:scale-95 transition-all"
             >
               Proceed to Checkout

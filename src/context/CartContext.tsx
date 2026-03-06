@@ -47,6 +47,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const clearCart = () => setItems([]);
+
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = items.reduce(
     (sum, i) => sum + i.product.price * i.quantity,
@@ -55,7 +57,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQuantity, totalItems, totalPrice }}
+      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice }}
     >
       {children}
     </CartContext.Provider>
