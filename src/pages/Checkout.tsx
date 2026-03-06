@@ -13,7 +13,7 @@ import { ArrowLeft, MapPin, Phone, CreditCard, CheckCircle2, Package } from "luc
 const Checkout = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
-  const { items, totalPrice, totalItems } = useCart();
+  const { items, totalPrice, totalItems, clearCart } = useCart();
   const { toast } = useToast();
 
   const [phone, setPhone] = useState("");
