@@ -30,13 +30,14 @@ const Login = () => {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
         toast({ title: "Account created!", description: "Check your email to confirm." });
+        navigate("/splash");
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        navigate("/home");
+        navigate("/splash");
       }
     }
     setLoading(false);
