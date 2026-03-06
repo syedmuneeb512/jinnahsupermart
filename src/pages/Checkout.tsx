@@ -99,11 +99,7 @@ const Checkout = () => {
 
       setOrderId(order.id);
       setOrderPlaced(true);
-
-      // Clear cart by removing all items
-      items.forEach((item) => {
-        // We'll use the cart context's removeFromCart indirectly
-      });
+      clearCart();
     } catch (err: any) {
       toast({ title: "Order failed", description: err?.message || "Something went wrong", variant: "destructive" });
     } finally {
