@@ -31,6 +31,7 @@ const Login = () => {
       } else {
         toast({ title: "Account created!", description: "Check your email to confirm." });
         navigate("/splash");
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
