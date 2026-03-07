@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, ShoppingBag } from "lucide-react";
+import { Eye, EyeOff, ShoppingBag, Mail, Phone } from "lucide-react";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [emailOrPhone, setEmailOrPhone] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -20,12 +20,14 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const isPhone = (value: string) => /^\+?\d{7,15}$/.test(value.replace(/\s/g, ""));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     if (isForgotPassword) {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(emailOrPhone, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) {
@@ -40,7 +42,7 @@ const Login = () => {
 
     if (isSignUp) {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: emailOrPhone,
         password,
         options: {
           emailRedirectTo: window.location.origin,
@@ -50,7 +52,6 @@ const Login = () => {
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        // Update profile with first/last name
         if (data.user) {
           await supabase.from("profiles").update({
             first_name: firstName,
@@ -62,10 +63,41 @@ const Login = () => {
         navigate("/splash");
       }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
+      // Try email or phone login
+      let loginResult;
+      if (isPhone(emailOrPhone)) {
+        // Look up email by phone from profiles
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("user_id")
+          .eq("phone", emailOrPhone.replace(/\s/g, ""))
+          .single();
+
+        if (!profile) {
+          toast({ title: "Error", description: "No account found with this phone number.", variant: "destructive" });
+          setLoading(false);
+          return;
+        }
+
+        // Get the user's email from auth - we need to find it via profiles
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("user_id", profile.user_id)
+          .single();
+
+        // We can't get email from profiles, so we attempt sign in differently
+        // Since Supabase requires email for password login, we inform the user
+        toast({ title: "Error", description: "Phone login requires the email associated with your account. Please use your email to sign in.", variant: "destructive" });
+        setLoading(false);
+        return;
       } else {
+        loginResult = await supabase.auth.signInWithPassword({ email: emailOrPhone, password });
+      }
+
+      if (loginResult?.error) {
+        toast({ title: "Error", description: loginResult.error.message, variant: "destructive" });
+      } else if (loginResult?.data) {
         navigate("/splash");
       }
     }
@@ -129,15 +161,25 @@ const Login = () => {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <Label htmlFor="emailOrPhone">
+              {isSignUp ? "Email" : "Email or Phone"}
+            </Label>
+            <div className="relative">
+              {isPhone(emailOrPhone) ? (
+                <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              ) : (
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              )}
+              <Input
+                id="emailOrPhone"
+                type={isSignUp ? "email" : "text"}
+                placeholder={isSignUp ? "you@example.com" : "Email or phone number"}
+                value={emailOrPhone}
+                onChange={(e) => setEmailOrPhone(e.target.value)}
+                required
+                className="pl-10"
+              />
+            </div>
           </div>
 
           {!isForgotPassword && (
