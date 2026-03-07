@@ -2,8 +2,10 @@ import { Search, Mic, ChevronRight } from "lucide-react";
 import { products, categories } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import BottomNav from "@/components/BottomNav";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as Icons from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const CategoryIcon = ({ iconName }: { iconName: string }) => {
   const Icon = (Icons as any)[iconName];
@@ -12,6 +14,25 @@ const CategoryIcon = ({ iconName }: { iconName: string }) => {
 
 const Index = () => {
   const [search, setSearch] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchName = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("first_name, display_name")
+        .eq("user_id", user.id)
+        .single();
+      if (data?.first_name) {
+        setFirstName(data.first_name);
+      } else if (data?.display_name) {
+        setFirstName(data.display_name.split(" ")[0]);
+      }
+    };
+    fetchName();
+  }, [user]);
 
   const filtered = search
     ? products.filter((p) =>
@@ -25,7 +46,9 @@ const Index = () => {
       <div className="px-4 pt-6 pb-2">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-base font-semibold text-foreground">Welcome, Maham</p>
+            <p className="text-base font-semibold text-foreground">
+              Welcome, {firstName || "there"}!
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full gradient-brand flex items-center justify-center">
