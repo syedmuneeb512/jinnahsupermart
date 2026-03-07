@@ -39,14 +39,25 @@ const Login = () => {
     }
 
     if (isSignUp) {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: window.location.origin },
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { first_name: firstName, last_name: lastName },
+        },
       });
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
+        // Update profile with first/last name
+        if (data.user) {
+          await supabase.from("profiles").update({
+            first_name: firstName,
+            last_name: lastName,
+            display_name: `${firstName} ${lastName}`.trim(),
+          }).eq("user_id", data.user.id);
+        }
         toast({ title: "Account created!", description: "Check your email to confirm." });
         navigate("/splash");
       }
