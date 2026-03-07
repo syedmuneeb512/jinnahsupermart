@@ -15,23 +15,27 @@ const CategoryIcon = ({ iconName }: { iconName: string }) => {
 const Index = () => {
   const [search, setSearch] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
-    const fetchName = async () => {
+    const fetchProfile = async () => {
       if (!user) return;
       const { data } = await supabase
         .from("profiles")
-        .select("first_name, display_name")
+        .select("first_name, display_name, avatar_url")
         .eq("user_id", user.id)
         .single();
       if (data?.first_name) {
         setFirstName(data.first_name);
       } else if (data?.display_name) {
-        setFirstName(data.display_name.split(" ")[0]);
+        const name = data.display_name.split(" ")[0];
+        // Don't show email as name
+        setFirstName(name.includes("@") ? "" : name);
       }
+      setAvatarUrl(data?.avatar_url || null);
     };
-    fetchName();
+    fetchProfile();
   }, [user]);
 
   const filtered = search
@@ -51,8 +55,14 @@ const Index = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full gradient-brand flex items-center justify-center">
-              <Icons.User size={18} className="text-primary-foreground" />
+            <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full gradient-brand flex items-center justify-center">
+                  <Icons.User size={18} className="text-primary-foreground" />
+                </div>
+              )}
             </div>
           </div>
         </div>
