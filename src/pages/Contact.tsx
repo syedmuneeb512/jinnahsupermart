@@ -23,7 +23,7 @@ const defaultSettings: SettingsMap = {
 
 const Contact = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const isAdmin = useIsAdmin();
   const [settings, setSettings] = useState<SettingsMap>(defaultSettings);
   const [isAdmin, setIsAdmin] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
