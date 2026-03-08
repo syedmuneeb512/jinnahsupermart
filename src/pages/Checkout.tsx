@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, MapPin, Phone, CreditCard, CheckCircle2, Package } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, CreditCard, CheckCircle2, Package, Mail, Building2 } from "lucide-react";
 
 const Checkout = () => {
   const navigate = useNavigate();
