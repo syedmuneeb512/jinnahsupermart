@@ -10,10 +10,17 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, MapPin, Phone, CreditCard, CheckCircle2, Package, Mail, Building2 } from "lucide-react";
 
+const FREE_DELIVERY_THRESHOLD = 2000;
+const DELIVERY_FEE = 35;
+
 const Checkout = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { items, totalPrice, totalItems, clearCart } = useCart();
+  const { toast } = useToast();
+
+  const deliveryFee = totalPrice < FREE_DELIVERY_THRESHOLD ? DELIVERY_FEE : 0;
+  const grandTotal = totalPrice + deliveryFee;
   const { toast } = useToast();
 
   const [phone, setPhone] = useState("");
