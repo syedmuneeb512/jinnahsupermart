@@ -11,14 +11,27 @@ const Orders = () => {
   const { data: orders, isLoading, refetch } = useQuery({
     queryKey: ["admin-orders"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch orders
+      const { data: ordersData, error } = await supabase
         .from("orders")
         .select(`
           *,
-          profiles!inner(display_name, first_name, last_name),
-          order_items(id, quantity, price, products(name))
+          order_items(id, quantity, price, product_id)
         `)
         .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch profiles for all user_ids
+      const userIds = [...new Set(ordersData.map((o) => o.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, first_name, last_name")
+        .in("user_id", userIds);
+
+      const profileMap = new Map((profiles || []).map((p) => [p.user_id, p]));
+
+      return ordersData.map((o) => ({ ...o, profile: profileMap.get(o.user_id) || null }));
 
       if (error) throw error;
       return data;
