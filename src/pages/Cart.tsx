@@ -1,7 +1,7 @@
 import { ArrowLeft, ShoppingCart, Minus, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
-import { formatPrice } from "@/data/products";
+const formatPrice = (price: number) => `PKR ${price.toLocaleString()}`;
 import BottomNav from "@/components/BottomNav";
 import { toast } from "sonner";
 
