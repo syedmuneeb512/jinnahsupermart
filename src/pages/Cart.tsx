@@ -1,4 +1,4 @@
-import { ArrowLeft, ShoppingCart, Minus, Plus, Star } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Minus, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
