@@ -122,7 +122,7 @@ const Login = () => {
           <div className="w-16 h-16 gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-4">
             <ShoppingBag className="text-primary-foreground" size={32} />
           </div>
-          <h1 className="text-2xl font-extrabold text-foreground">JSmart</h1>
+          <h1 className="text-2xl font-extrabold text-foreground">JINNAH SUPER MART</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {isForgotPassword
               ? "Reset your password"
