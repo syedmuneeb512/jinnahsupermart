@@ -121,6 +121,54 @@ const Profile = () => {
     }
   }, [user]);
 
+  // Fetch mart gallery images
+  const fetchGallery = async () => {
+    setLoadingGallery(true);
+    const { data } = await supabase.storage.from("mart-gallery").list("", { limit: 5, sortBy: { column: "created_at", order: "asc" } });
+    if (data) {
+      const urls = data.map((file) => {
+        const { data: urlData } = supabase.storage.from("mart-gallery").getPublicUrl(file.name);
+        return urlData.publicUrl;
+      });
+      setGalleryImages(urls);
+    }
+    setLoadingGallery(false);
+  };
+
+  useEffect(() => { fetchGallery(); }, []);
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (galleryImages.length >= 5) {
+      toast({ title: "Limit reached", description: "Maximum 5 images allowed.", variant: "destructive" });
+      return;
+    }
+    setUploadingGallery(true);
+    const fileName = `mart-${Date.now()}.${file.name.split(".").pop()}`;
+    const { error } = await supabase.storage.from("mart-gallery").upload(fileName, file);
+    if (error) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Image uploaded!" });
+      await fetchGallery();
+    }
+    setUploadingGallery(false);
+    if (galleryInputRef.current) galleryInputRef.current.value = "";
+  };
+
+  const handleGalleryDelete = async (url: string) => {
+    const fileName = url.split("/").pop();
+    if (!fileName) return;
+    const { error } = await supabase.storage.from("mart-gallery").remove([fileName]);
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Image deleted!" });
+      await fetchGallery();
+    }
+  };
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
