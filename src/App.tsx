@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
 import ResetPassword from "./pages/ResetPassword";
+import CategoriesPage from "./pages/CategoriesPage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/home" element={<Index />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/login" element={<Login />} />
               <Route path="/profile" element={<Profile />} />
