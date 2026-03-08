@@ -413,6 +413,60 @@ const Profile = () => {
         )}
       </div>
 
+      {/* About Mart Gallery */}
+      <div className="px-4 mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+            <Store size={20} />
+            About Mart
+          </h2>
+          {isAdmin && galleryImages.length < 5 && (
+            <button
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={uploadingGallery}
+              className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-primary-foreground"
+            >
+              {uploadingGallery ? (
+                <div className="animate-spin w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
+              ) : (
+                <Plus size={18} />
+              )}
+            </button>
+          )}
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleGalleryUpload}
+            className="hidden"
+          />
+        </div>
+
+        {loadingGallery ? (
+          <div className="flex justify-center py-6">
+            <div className="animate-spin w-6 h-6 border-3 border-primary border-t-transparent rounded-full" />
+          </div>
+        ) : galleryImages.length === 0 ? (
+          <p className="text-muted-foreground text-sm text-center py-6">No mart photos yet.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {galleryImages.map((url, idx) => (
+              <div key={idx} className="relative group rounded-xl overflow-hidden aspect-square bg-muted">
+                <img src={url} alt={`Mart photo ${idx + 1}`} className="w-full h-full object-cover" />
+                {isAdmin && (
+                  <button
+                    onClick={() => handleGalleryDelete(url)}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive/80 flex items-center justify-center text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <BottomNav />
     </div>
   );
