@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, MapPin, Phone, CreditCard, CheckCircle2, Package } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, CreditCard, CheckCircle2, Package, Mail, Building2 } from "lucide-react";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -17,6 +17,8 @@ const Checkout = () => {
   const { toast } = useToast();
 
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [placing, setPlacing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -32,6 +34,8 @@ const Checkout = () => {
   // Pre-fill from profile
   useEffect(() => {
     if (user) {
+      // Pre-fill email from auth
+      setEmail(user.email || "");
       supabase
         .from("profiles")
         .select("phone, address")
@@ -55,8 +59,8 @@ const Checkout = () => {
 
   const handlePlaceOrder = async () => {
     if (!user) return;
-    if (!phone.trim() || !address.trim()) {
-      toast({ title: "Missing info", description: "Please enter phone and address.", variant: "destructive" });
+    if (!phone.trim() || !email.trim() || !city.trim() || !address.trim()) {
+      toast({ title: "Missing info", description: "Please fill in all delivery fields.", variant: "destructive" });
       return;
     }
 
@@ -191,6 +195,35 @@ const Checkout = () => {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Enter your phone number"
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <div className="relative">
+            <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="city">City</Label>
+          <div className="relative">
+            <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Enter your city"
               className="pl-10"
             />
           </div>
