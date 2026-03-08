@@ -381,63 +381,62 @@ const Profile = () => {
         </Button>
       </div>
 
-      {/* My Orders Section */}
+      {/* My Orders Section - Single Dropdown */}
       <div className="px-4 mt-8">
-        <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mb-4">
-          <Package size={20} />
-          My Orders
-        </h2>
-        {loadingOrders ? (
-          <div className="flex justify-center py-6">
-            <div className="animate-spin w-6 h-6 border-3 border-primary border-t-transparent rounded-full" />
+        <button
+          onClick={() => setExpandedOrder(expandedOrder === "all" ? null : "all")}
+          className="w-full bg-card rounded-xl p-4 shadow-card flex items-center justify-between"
+        >
+          <div className="flex items-center gap-2">
+            <Package size={20} className="text-primary" />
+            <h2 className="text-lg font-bold text-foreground">My Orders</h2>
+            {orders.length > 0 && (
+              <Badge variant="secondary" className="text-[10px]">{orders.length}</Badge>
+            )}
           </div>
-        ) : orders.length === 0 ? (
-          <p className="text-muted-foreground text-sm text-center py-6">You haven't placed any orders yet.</p>
-        ) : (
-          <div className="space-y-3">
-            {orders.map((order) => {
-              const isExpanded = expandedOrder === order.id;
-              return (
-                <div key={order.id} className="border border-border rounded-xl overflow-hidden bg-card">
-                  <button
-                    onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
-                    className="w-full px-4 py-3 flex items-center justify-between text-left"
-                  >
-                    <div className="flex-1 min-w-0">
+          {expandedOrder === "all" ? <ChevronUp size={20} className="text-muted-foreground" /> : <ChevronDown size={20} className="text-muted-foreground" />}
+        </button>
+
+        {expandedOrder === "all" && (
+          <div className="mt-2 bg-card rounded-xl shadow-card overflow-hidden">
+            {loadingOrders ? (
+              <div className="flex justify-center py-6">
+                <div className="animate-spin w-6 h-6 border-3 border-primary border-t-transparent rounded-full" />
+              </div>
+            ) : orders.length === 0 ? (
+              <p className="text-muted-foreground text-sm text-center py-6">You haven't placed any orders yet.</p>
+            ) : (
+              <div className="divide-y divide-border">
+                {orders.map((order) => (
+                  <div key={order.id} className="px-4 py-3 space-y-2">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-muted-foreground font-mono">
                           #{order.id.slice(0, 8).toUpperCase()}
                         </span>
                         <StatusBadge status={order.status} />
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(order.created_at).toLocaleDateString("en-PK", { day: "numeric", month: "short", year: "numeric" })}
-                        {" · "}Rs. {order.total.toLocaleString()}
-                      </p>
+                      <span className="text-xs font-bold text-primary">Rs. {order.total.toLocaleString()}</span>
                     </div>
-                    {isExpanded ? <ChevronUp size={18} className="text-muted-foreground" /> : <ChevronDown size={18} className="text-muted-foreground" />}
-                  </button>
-                  {isExpanded && (
-                    <div className="px-4 pb-4 border-t border-border pt-3 space-y-2">
-                      {order.city && <p className="text-xs text-muted-foreground">📍 {order.city}{order.shipping_address ? `, ${order.shipping_address}` : ""}</p>}
-                      <div className="space-y-2">
-                        {order.order_items.map((item, idx) => (
-                          <div key={idx} className="flex items-center gap-3">
-                            {item.products?.image && (
-                              <img src={item.products.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-muted" />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-foreground truncate">{item.products?.name || "Product"}</p>
-                              <p className="text-xs text-muted-foreground">Qty: {item.quantity} · Rs. {item.price.toLocaleString()}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      {new Date(order.created_at).toLocaleDateString("en-PK", { day: "numeric", month: "short", year: "numeric" })}
+                    </p>
+                    {/* Order items */}
+                    <div className="space-y-1.5 pl-1">
+                      {order.order_items.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          {item.products?.image && (
+                            <img src={item.products.image} alt="" className="w-8 h-8 rounded-lg object-cover bg-muted" />
+                          )}
+                          <span className="text-xs text-foreground truncate flex-1">{item.products?.name || "Product"}</span>
+                          <span className="text-[11px] text-muted-foreground whitespace-nowrap">×{item.quantity}</span>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
