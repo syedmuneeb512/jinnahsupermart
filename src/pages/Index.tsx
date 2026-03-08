@@ -86,6 +86,9 @@ const Index = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <a href="https://wa.me/923106522033" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-[hsl(142,70%,45%)] flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
+              <Icons.MessageCircle size={18} className="text-primary-foreground" />
+            </a>
             <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
