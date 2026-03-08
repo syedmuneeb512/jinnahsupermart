@@ -89,7 +89,7 @@ const Orders = () => {
                   </thead>
                   <tbody>
                     {orders.map((order) => {
-                      const profile = order.profiles as any;
+                      const profile = (order as any).profile;
                       const customerName = profile?.display_name || 
                         [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || 
                         "Unknown";
