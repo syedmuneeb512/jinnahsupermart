@@ -60,6 +60,10 @@ const Profile = () => {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [loadingGallery, setLoadingGallery] = useState(true);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [martOwner, setMartOwner] = useState("");
+  const [martLocation, setMartLocation] = useState("");
+  const [editingMartInfo, setEditingMartInfo] = useState(false);
+  const [savingMartInfo, setSavingMartInfo] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
