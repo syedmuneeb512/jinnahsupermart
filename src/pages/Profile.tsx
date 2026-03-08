@@ -6,8 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, LogOut, User, Phone, MapPin, Save, Camera } from "lucide-react";
+import { ArrowLeft, LogOut, User, Phone, MapPin, Save, Camera, Package, ChevronDown, ChevronUp } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import BottomNav from "@/components/BottomNav";
+
+interface OrderWithItems {
+  id: string;
+  status: string;
+  total: number;
+  created_at: string;
+  shipping_address: string | null;
+  city: string | null;
+  order_items: {
+    quantity: number;
+    price: number;
+    product_id: string;
+    products: { name: string; image: string | null } | null;
+  }[];
+}
 
 const Profile = () => {
   const { user, isLoading, signOut } = useAuth();
