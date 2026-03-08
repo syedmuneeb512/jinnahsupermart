@@ -38,15 +38,6 @@ const Contact = () => {
         data.forEach((row: any) => { map[row.key] = row.value; });
         setSettings(map);
       }
-      if (user) {
-        const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .maybeSingle();
-        setIsAdmin(!!roleData);
-      }
       setLoading(false);
     };
     fetchData();
