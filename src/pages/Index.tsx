@@ -61,6 +61,33 @@ const BannerIcon = ({ iconName }: { iconName: string }) => {
 
 const Index = () => {
   const [search, setSearch] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  const startVoiceSearch = useCallback(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast({ title: "Voice search not supported", description: "Your browser doesn't support voice search.", variant: "destructive" });
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setSearch(transcript);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognition.start();
+  }, [isListening]);
   const [firstName, setFirstName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [products, setProducts] = useState<DbProduct[]>([]);
