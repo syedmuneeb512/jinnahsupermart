@@ -1,11 +1,28 @@
 import { Search, Mic, ChevronRight } from "lucide-react";
-import { products, categories } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import BottomNav from "@/components/BottomNav";
 import { useState, useEffect } from "react";
 import * as Icons from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+
+interface DbProduct {
+  id: string;
+  name: string;
+  price: number;
+  original_price: number | null;
+  image: string | null;
+  description: string | null;
+  rating: number | null;
+  stock: number;
+  category_id: string | null;
+}
+
+interface DbCategory {
+  id: string;
+  name: string;
+  icon: string | null;
+}
 
 const CategoryIcon = ({ iconName }: { iconName: string }) => {
   const Icon = (Icons as any)[iconName];
@@ -16,6 +33,9 @@ const Index = () => {
   const [search, setSearch] = useState("");
   const [firstName, setFirstName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [products, setProducts] = useState<DbProduct[]>([]);
+  const [categories, setCategories] = useState<DbCategory[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -30,7 +50,6 @@ const Index = () => {
         setFirstName(data.first_name);
       } else if (data?.display_name) {
         const name = data.display_name.split(" ")[0];
-        // Don't show email as name
         setFirstName(name.includes("@") ? "" : name);
       }
       setAvatarUrl(data?.avatar_url || null);
@@ -38,11 +57,23 @@ const Index = () => {
     fetchProfile();
   }, [user]);
 
-  const filtered = search
-    ? products.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase())
-      )
-    : products;
+  useEffect(() => {
+    const fetchShopData = async () => {
+      const [prodRes, catRes] = await Promise.all([
+        supabase.from("products").select("*").order("created_at", { ascending: false }),
+        supabase.from("categories").select("id, name, icon").order("name"),
+      ]);
+      if (prodRes.data) setProducts(prodRes.data);
+      if (catRes.data) setCategories(catRes.data);
+    };
+    fetchShopData();
+  }, []);
+
+  const filtered = products.filter((p) => {
+    const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = !selectedCategory || p.category_id === selectedCategory;
+    return matchSearch && matchCategory;
+  });
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
@@ -106,13 +137,27 @@ const Index = () => {
       {/* Categories */}
       <div className="px-4 py-2">
         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className="flex flex-col items-center gap-1.5 min-w-[60px] group"
+          >
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+              !selectedCategory ? "gradient-brand text-primary-foreground" : "bg-primary/10 text-primary group-hover:gradient-brand group-hover:text-primary-foreground"
+            }`}>
+              <CategoryIcon iconName="LayoutGrid" />
+            </div>
+            <span className="text-[11px] font-medium text-foreground">All</span>
+          </button>
           {categories.map((cat) => (
             <button
-              key={cat.name}
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
               className="flex flex-col items-center gap-1.5 min-w-[60px] group"
             >
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:gradient-brand group-hover:text-primary-foreground transition-all">
-                <CategoryIcon iconName={cat.icon} />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                selectedCategory === cat.id ? "gradient-brand text-primary-foreground" : "bg-primary/10 text-primary group-hover:gradient-brand group-hover:text-primary-foreground"
+              }`}>
+                <CategoryIcon iconName={cat.icon || "Tag"} />
               </div>
               <span className="text-[11px] font-medium text-foreground">{cat.name}</span>
             </button>
@@ -120,17 +165,23 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Popular Products */}
+      {/* Products */}
       <div className="px-4 py-3">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-bold text-foreground">Popular Products</h2>
-          <ChevronRight size={20} className="text-muted-foreground" />
+          <h2 className="text-base font-bold text-foreground">
+            {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "All Products"}
+          </h2>
+          <span className="text-xs text-muted-foreground">{filtered.length} items</span>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          {filtered.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {filtered.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">No products found</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {filtered.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
 
       <BottomNav />

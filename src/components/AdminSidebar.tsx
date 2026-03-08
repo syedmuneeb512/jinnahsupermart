@@ -9,6 +9,7 @@ const AdminSidebar = () => {
 
   const links = [
     { label: "Dashboard", icon: BarChart3, path: "/admin" },
+    { label: "Categories", icon: FolderOpen, path: "/admin/categories" },
     { label: "Products", icon: Package, path: "/admin/products" },
     { label: "Orders", icon: ShoppingCart, path: "/admin/orders" },
     { label: "Users", icon: Users, path: "/admin/users" },
