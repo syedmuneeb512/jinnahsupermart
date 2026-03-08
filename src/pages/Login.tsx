@@ -128,6 +128,8 @@ const Login = () => {
           <div className="text-[10px] font-semibold tracking-[0.3em] uppercase text-muted-foreground mt-1">
             Click · Select · Deliver
           </div>
+          <p className="text-xs font-medium text-muted-foreground mt-2">
+            {isForgotPassword
               ? "Reset your password"
               : isSignUp
               ? "Create your account"
