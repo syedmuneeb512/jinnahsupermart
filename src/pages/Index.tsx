@@ -122,7 +122,7 @@ const Index = () => {
             <div className="relative z-10">
               <h2 className="text-xl font-extrabold text-primary-foreground">JSmart Store</h2>
               <p className="text-sm text-primary-foreground/90 mt-1">
-                Your one-stop shop<br />for everything
+                Quality products<br />at best prices
               </p>
               <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
                 Shop Now <ChevronRight size={14} />
@@ -133,35 +133,35 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Card 2 - Big Sale */}
-          <div className="rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start" style={{ background: "linear-gradient(135deg, hsl(340 80% 55%), hsl(10 90% 60%))" }}>
+          {/* Card 2 - Grocery Deals */}
+          <div className="rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start" style={{ background: "linear-gradient(135deg, hsl(140 60% 38%), hsl(160 70% 42%))" }}>
             <div className="relative z-10">
-              <h2 className="text-xl font-extrabold text-primary-foreground">Big Sale!</h2>
+              <h2 className="text-xl font-extrabold text-primary-foreground">Grocery Deals</h2>
               <p className="text-sm text-primary-foreground/90 mt-1">
-                Get 50% OFF<br />on electronics
+                Up to 30% OFF<br />on daily essentials
               </p>
               <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
                 Shop Now <ChevronRight size={14} />
               </button>
             </div>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
-              <Icons.Percent size={80} className="text-primary-foreground" />
+              <Icons.ShoppingBasket size={80} className="text-primary-foreground" />
             </div>
           </div>
 
-          {/* Card 3 - New Arrivals */}
-          <div className="rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start" style={{ background: "linear-gradient(135deg, hsl(160 60% 40%), hsl(180 70% 45%))" }}>
+          {/* Card 3 - Electronics Sale */}
+          <div className="rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start" style={{ background: "linear-gradient(135deg, hsl(340 80% 55%), hsl(10 90% 60%))" }}>
             <div className="relative z-10">
-              <h2 className="text-xl font-extrabold text-primary-foreground">New Arrivals</h2>
+              <h2 className="text-xl font-extrabold text-primary-foreground">Electronics Sale</h2>
               <p className="text-sm text-primary-foreground/90 mt-1">
-                Fresh styles just<br />dropped this week
+                Save up to PKR 20,000<br />on gadgets
               </p>
               <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
-                Explore <ChevronRight size={14} />
+                Shop Now <ChevronRight size={14} />
               </button>
             </div>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
-              <Icons.Sparkles size={80} className="text-primary-foreground" />
+              <Icons.Smartphone size={80} className="text-primary-foreground" />
             </div>
           </div>
 
@@ -170,7 +170,7 @@ const Index = () => {
             <div className="relative z-10">
               <h2 className="text-xl font-extrabold text-primary-foreground">Free Delivery</h2>
               <p className="text-sm text-primary-foreground/90 mt-1">
-                On orders above<br />PKR 3,000
+                On orders above<br />PKR 2,000
               </p>
               <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
                 Order Now <ChevronRight size={14} />
