@@ -122,11 +122,12 @@ const Login = () => {
           <div className="w-20 h-20 gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
             <ShoppingBag className="text-primary-foreground" size={36} />
           </div>
-          <h1 className="text-2xl font-black tracking-wide text-foreground uppercase" style={{ letterSpacing: '0.08em' }}>
+          <h1 className="text-lg font-black tracking-wide text-foreground uppercase" style={{ letterSpacing: '0.1em' }}>
             Jinnah <span className="text-primary">Super</span> Mart
           </h1>
-          <p className="text-sm font-medium text-muted-foreground mt-2 tracking-wide">
-            {isForgotPassword
+          <div className="text-[10px] font-semibold tracking-[0.3em] uppercase text-muted-foreground mt-1">
+            Click · Select · Deliver
+          </div>
               ? "Reset your password"
               : isSignUp
               ? "Create your account"
