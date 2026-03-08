@@ -85,11 +85,8 @@ const Checkout = () => {
         price: item.product.price,
       }));
 
-      // Note: product_id references the DB products table (uuid).
-      // Since we're using static products with numeric IDs, we skip order_items insert
-      // and store summary in the order itself. For a full DB-backed catalog, uncomment below.
-      // const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
-      // if (itemsError) throw itemsError;
+      const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
+      if (itemsError) throw itemsError;
 
       // 3. Update profile with latest phone/address
       await supabase
