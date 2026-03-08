@@ -59,8 +59,8 @@ const Checkout = () => {
 
   const handlePlaceOrder = async () => {
     if (!user) return;
-    if (!phone.trim() || !address.trim()) {
-      toast({ title: "Missing info", description: "Please enter phone and address.", variant: "destructive" });
+    if (!phone.trim() || !email.trim() || !city.trim() || !address.trim()) {
+      toast({ title: "Missing info", description: "Please fill in all delivery fields.", variant: "destructive" });
       return;
     }
 
