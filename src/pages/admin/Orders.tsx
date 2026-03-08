@@ -16,7 +16,7 @@ const Orders = () => {
         .from("orders")
         .select(`
           *,
-          order_items(id, quantity, price, product_id)
+          order_items(id, quantity, price, product_id, products(name))
         `)
         .order("created_at", { ascending: false });
 
@@ -82,7 +82,7 @@ const Orders = () => {
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Customer</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Phone</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Address</th>
-                      <th className="text-left py-3 px-4 text-muted-foreground font-medium">Items</th>
+                      <th className="text-left py-3 px-4 text-muted-foreground font-medium">Products</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Total</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Date</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Status</th>
@@ -94,14 +94,20 @@ const Orders = () => {
                       const customerName = profile?.display_name || 
                         [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || 
                         "Unknown";
-                      const itemCount = (order.order_items as any[])?.reduce((sum: number, i: any) => sum + i.quantity, 0) || 0;
+                      const orderItems = (order.order_items as any[]) || [];
+                      const itemCount = orderItems.reduce((sum: number, i: any) => sum + i.quantity, 0);
+                      const productNames = orderItems
+                        .map((i: any) => `${i.products?.name || "Unknown"} ×${i.quantity}`)
+                        .join(", ");
 
                       return (
                         <tr key={order.id} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
                           <td className="py-3 px-4 font-medium text-foreground">{customerName}</td>
                           <td className="py-3 px-4 text-muted-foreground">{order.phone || "-"}</td>
                           <td className="py-3 px-4 text-muted-foreground max-w-[200px] truncate">{order.shipping_address || "-"}</td>
-                          <td className="py-3 px-4 text-foreground">{itemCount}</td>
+                          <td className="py-3 px-4 text-foreground max-w-[250px]">
+                            {productNames || <span className="text-muted-foreground">No items</span>}
+                          </td>
                           <td className="py-3 px-4 text-foreground font-medium">PKR {Number(order.total).toLocaleString()}</td>
                           <td className="py-3 px-4 text-muted-foreground">{new Date(order.created_at).toLocaleDateString()}</td>
                           <td className="py-3 px-4">
