@@ -34,6 +34,8 @@ const Checkout = () => {
   // Pre-fill from profile
   useEffect(() => {
     if (user) {
+      // Pre-fill email from auth
+      setEmail(user.email || "");
       supabase
         .from("profiles")
         .select("phone, address")
