@@ -131,7 +131,7 @@ const Index = () => {
           {/* Card 1 - JSmart */}
           <div className="gradient-banner rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start">
             <div className="relative z-10">
-              <h2 className="text-xl font-extrabold text-primary-foreground">JSmart Store</h2>
+              <h2 className="text-xl font-extrabold text-primary-foreground">Jinna Super Mart</h2>
               <p className="text-sm text-primary-foreground/90 mt-1">
                 Quality products<br />at best prices
               </p>
