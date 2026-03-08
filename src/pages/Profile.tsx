@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, LogOut, User, Phone, MapPin, Save, Camera, Package, ChevronDown, ChevronUp, Store, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, LogOut, User, Phone, MapPin, Save, Camera, Package, ChevronDown, ChevronUp, Store, Plus, Trash2, Pencil, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import BottomNav from "@/components/BottomNav";
 
@@ -60,6 +60,10 @@ const Profile = () => {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [loadingGallery, setLoadingGallery] = useState(true);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [martOwner, setMartOwner] = useState("");
+  const [martLocation, setMartLocation] = useState("");
+  const [editingMartInfo, setEditingMartInfo] = useState(false);
+  const [savingMartInfo, setSavingMartInfo] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -136,6 +140,31 @@ const Profile = () => {
   };
 
   useEffect(() => { fetchGallery(); }, []);
+
+  // Fetch mart info from store_settings
+  useEffect(() => {
+    const fetchMartInfo = async () => {
+      const { data } = await supabase.from("store_settings").select("key, value").in("key", ["mart_owner_name", "mart_location"]);
+      if (data) {
+        data.forEach((row) => {
+          if (row.key === "mart_owner_name") setMartOwner(row.value);
+          if (row.key === "mart_location") setMartLocation(row.value);
+        });
+      }
+    };
+    fetchMartInfo();
+  }, []);
+
+  const handleSaveMartInfo = async () => {
+    setSavingMartInfo(true);
+    await Promise.all([
+      supabase.from("store_settings").update({ value: martOwner }).eq("key", "mart_owner_name"),
+      supabase.from("store_settings").update({ value: martLocation }).eq("key", "mart_location"),
+    ]);
+    setSavingMartInfo(false);
+    setEditingMartInfo(false);
+    toast({ title: "Mart info updated!" });
+  };
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -467,17 +496,43 @@ const Profile = () => {
         )}
 
         {/* Mart Info */}
-        <div className="mt-4 bg-card rounded-xl p-4 shadow-card space-y-2">
-          <div className="flex items-center gap-2 text-sm text-foreground">
-            <User size={15} className="text-primary" />
-            <span className="font-semibold">Owner:</span>
-            <span className="text-muted-foreground">Muhammad Muneeb</span>
-          </div>
-          <div className="flex items-start gap-2 text-sm text-foreground">
-            <MapPin size={15} className="text-primary mt-0.5" />
-            <span className="font-semibold">Location:</span>
-            <span className="text-muted-foreground">Jinnah Super Mart, Main Bazar, Pakistan</span>
-          </div>
+        <div className="mt-4 bg-card rounded-xl p-4 shadow-card space-y-3">
+          {isAdmin && !editingMartInfo && (
+            <button onClick={() => setEditingMartInfo(true)} className="ml-auto block text-primary">
+              <Pencil size={14} />
+            </button>
+          )}
+          {editingMartInfo ? (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Owner Name</Label>
+                <Input value={martOwner} onChange={(e) => setMartOwner(e.target.value)} placeholder="Owner name" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Location</Label>
+                <Input value={martLocation} onChange={(e) => setMartLocation(e.target.value)} placeholder="Mart location" />
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleSaveMartInfo} disabled={savingMartInfo} className="gradient-brand text-primary-foreground">
+                  <Check size={14} className="mr-1" /> {savingMartInfo ? "Saving..." : "Save"}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setEditingMartInfo(false)}>Cancel</Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 text-sm text-foreground">
+                <User size={15} className="text-primary" />
+                <span className="font-semibold">Owner:</span>
+                <span className="text-muted-foreground">{martOwner || "—"}</span>
+              </div>
+              <div className="flex items-start gap-2 text-sm text-foreground">
+                <MapPin size={15} className="text-primary mt-0.5" />
+                <span className="font-semibold">Location:</span>
+                <span className="text-muted-foreground">{martLocation || "—"}</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
