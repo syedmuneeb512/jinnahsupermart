@@ -165,7 +165,13 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-3">
             {isAdmin && (
-              <AdminEditButton to="/admin" label="Admin Panel" />
+              <button
+                onClick={() => navigate("/admin")}
+                title="Admin Panel"
+                className="w-9 h-9 rounded-full overflow-hidden hover:opacity-90 active:scale-90 transition-all"
+              >
+                <img src={adminPanelIcon} alt="Admin Panel" className="w-full h-full object-cover" />
+              </button>
             )}
             <button onClick={() => navigate("/contact")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
               <PhoneCall size={18} className="text-primary-foreground" />
