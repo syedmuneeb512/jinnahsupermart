@@ -132,7 +132,9 @@ const Dashboard = () => {
                   <thead>
                     <tr className="border-b border-border">
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Customer</th>
+                      <th className="text-left py-3 px-4 text-muted-foreground font-medium">Email</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Phone</th>
+                      <th className="text-left py-3 px-4 text-muted-foreground font-medium">City</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Address</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Products</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Total</th>
