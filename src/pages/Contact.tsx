@@ -2,7 +2,7 @@ import { ArrowLeft, MessageCircle, Mail, Phone, MapPin, Clock, Pencil, Check, X 
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { toast } from "@/hooks/use-toast";
 
 interface SettingsMap {
@@ -23,9 +23,8 @@ const defaultSettings: SettingsMap = {
 
 const Contact = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const isAdmin = useIsAdmin();
   const [settings, setSettings] = useState<SettingsMap>(defaultSettings);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [loading, setLoading] = useState(true);
@@ -38,19 +37,10 @@ const Contact = () => {
         data.forEach((row: any) => { map[row.key] = row.value; });
         setSettings(map);
       }
-      if (user) {
-        const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .maybeSingle();
-        setIsAdmin(!!roleData);
-      }
       setLoading(false);
     };
     fetchData();
-  }, [user]);
+  }, []);
 
   const startEdit = (key: string, value: string) => {
     setEditing(key);

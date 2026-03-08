@@ -2,9 +2,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MoreVertical, Star, Minus, Plus } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import BottomNav from "@/components/BottomNav";
+import AdminEditButton from "@/components/AdminEditButton";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const formatPrice = (price: number) => `PKR ${price.toLocaleString()}`;
 
@@ -26,6 +28,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState<DbProduct | null>(null);
   const [loading, setLoading] = useState(true);
+  const isAdmin = useIsAdmin();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -63,9 +66,12 @@ const ProductDetail = () => {
           <ArrowLeft size={22} className="text-foreground" />
         </button>
         <h1 className="text-base font-bold text-foreground">{product.name}</h1>
-        <button className="p-1">
-          <MoreVertical size={22} className="text-foreground" />
-        </button>
+        <div className="flex items-center gap-2">
+          {isAdmin && <AdminEditButton to="/admin/products" label="Edit Product" />}
+          <button className="p-1">
+            <MoreVertical size={22} className="text-foreground" />
+          </button>
+        </div>
       </div>
 
       {/* Product Image */}

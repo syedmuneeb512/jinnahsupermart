@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import ProductCard from "@/components/ProductCard";
+import AdminEditButton from "@/components/AdminEditButton";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import * as Icons from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 
@@ -35,6 +37,7 @@ const CategoriesPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const isAdmin = useIsAdmin();
 
   useEffect(() => {
     const fetch = async () => {
@@ -61,6 +64,11 @@ const CategoriesPage = () => {
           <ArrowLeft size={22} className="text-foreground" />
         </button>
         <h1 className="text-lg font-bold text-foreground">Categories</h1>
+        {isAdmin && (
+          <div className="ml-auto">
+            <AdminEditButton to="/admin/categories" label="Edit Categories" />
+          </div>
+        )}
       </div>
 
       {/* Category grid */}
@@ -98,7 +106,7 @@ const CategoriesPage = () => {
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {filtered.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id} product={p} isAdmin={isAdmin} />
             ))}
           </div>
         )}
