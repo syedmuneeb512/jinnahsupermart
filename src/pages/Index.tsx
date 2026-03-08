@@ -169,9 +169,9 @@ const Index = () => {
               <button
                 onClick={() => navigate("/admin")}
                 title="Admin Panel"
-                className="w-9 h-9 rounded-full overflow-hidden hover:opacity-90 active:scale-90 transition-all"
+                className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all"
               >
-                <img src={adminPanelIcon} alt="Admin Panel" className="w-full h-full object-cover" />
+                Manage
               </button>
             )}
             <button onClick={() => navigate("/contact")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
