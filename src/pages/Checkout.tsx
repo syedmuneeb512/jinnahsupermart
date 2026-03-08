@@ -175,19 +175,29 @@ const Checkout = () => {
               </span>
             </div>
           ))}
-          <div className="border-t border-border pt-2 flex items-center justify-between">
-            <span className="text-sm font-bold text-foreground">
-              Total ({totalItems} items)
-            </span>
-            <span className="text-base font-extrabold text-primary">
-              {formatPrice(totalPrice)}
-            </span>
+          <div className="border-t border-border pt-2 space-y-1">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Subtotal ({totalItems} items)</span>
+              <span className="text-muted-foreground font-semibold">{formatPrice(totalPrice)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Delivery Fee</span>
+              {deliveryFee > 0 ? (
+                <span className="text-destructive font-semibold">{formatPrice(deliveryFee)}</span>
+              ) : (
+                <span className="text-green-600 font-semibold">Free</span>
+              )}
+            </div>
+            {deliveryFee > 0 && (
+              <p className="text-[11px] text-muted-foreground">
+                🚚 {formatPrice(FREE_DELIVERY_THRESHOLD - totalPrice)} مزید خریداری پر free delivery!
+              </p>
+            )}
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-sm font-bold text-foreground">Total</span>
+              <span className="text-base font-extrabold text-primary">{formatPrice(grandTotal)}</span>
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Delivery Info */}
-      <div className="px-4 space-y-4">
         <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
           <MapPin size={16} className="text-primary" />
           Delivery Information
