@@ -21,6 +21,7 @@ import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
 import ResetPassword from "./pages/ResetPassword";
 import CategoriesPage from "./pages/CategoriesPage";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
