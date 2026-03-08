@@ -2,7 +2,7 @@ import { ArrowLeft, MessageCircle, Mail, Phone, MapPin, Clock, Pencil, Check, X 
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { toast } from "@/hooks/use-toast";
 
 interface SettingsMap {
