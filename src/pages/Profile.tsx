@@ -25,6 +25,20 @@ interface OrderWithItems {
   }[];
 }
 
+const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  pending: { label: "⏳ Pending", variant: "secondary" },
+  confirmed: { label: "✅ Confirmed", variant: "default" },
+  processing: { label: "📦 Processing", variant: "default" },
+  shipped: { label: "🚚 Shipped", variant: "default" },
+  delivered: { label: "✔️ Delivered", variant: "default" },
+  cancelled: { label: "❌ Cancelled", variant: "destructive" },
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const config = statusConfig[status] || { label: status, variant: "outline" as const };
+  return <Badge variant={config.variant} className="text-[10px] px-2 py-0.5">{config.label}</Badge>;
+};
+
 const Profile = () => {
   const { user, isLoading, signOut } = useAuth();
   const navigate = useNavigate();
