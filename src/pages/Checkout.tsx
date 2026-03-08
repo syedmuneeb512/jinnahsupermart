@@ -10,11 +10,17 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, MapPin, Phone, CreditCard, CheckCircle2, Package, Mail, Building2 } from "lucide-react";
 
+const FREE_DELIVERY_THRESHOLD = 2000;
+const DELIVERY_FEE = 35;
+
 const Checkout = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { items, totalPrice, totalItems, clearCart } = useCart();
   const { toast } = useToast();
+
+  const deliveryFee = totalPrice < FREE_DELIVERY_THRESHOLD ? DELIVERY_FEE : 0;
+  const grandTotal = totalPrice + deliveryFee;
 
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -70,8 +76,7 @@ const Checkout = () => {
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
-          user_id: user.id,
-          total: totalPrice,
+          total: grandTotal,
           phone: phone.trim(),
           email: email.trim(),
           city: city.trim(),
@@ -170,13 +175,28 @@ const Checkout = () => {
               </span>
             </div>
           ))}
-          <div className="border-t border-border pt-2 flex items-center justify-between">
-            <span className="text-sm font-bold text-foreground">
-              Total ({totalItems} items)
-            </span>
-            <span className="text-base font-extrabold text-primary">
-              {formatPrice(totalPrice)}
-            </span>
+          <div className="border-t border-border pt-2 space-y-1">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Subtotal ({totalItems} items)</span>
+              <span className="text-muted-foreground font-semibold">{formatPrice(totalPrice)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Delivery Fee</span>
+              {deliveryFee > 0 ? (
+                <span className="text-destructive font-semibold">{formatPrice(deliveryFee)}</span>
+              ) : (
+                <span className="text-green-600 font-semibold">Free</span>
+              )}
+            </div>
+            {deliveryFee > 0 && (
+              <p className="text-[11px] text-muted-foreground">
+                🚚 {formatPrice(FREE_DELIVERY_THRESHOLD - totalPrice)} مزید خریداری پر free delivery!
+              </p>
+            )}
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-sm font-bold text-foreground">Total</span>
+              <span className="text-base font-extrabold text-primary">{formatPrice(grandTotal)}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -252,12 +272,12 @@ const Checkout = () => {
             className="w-full gradient-brand text-primary-foreground py-6 text-sm font-bold"
           >
             <CreditCard size={18} className="mr-2" />
-            {placing ? "Placing Order..." : `Place Order — ${formatPrice(totalPrice)}`}
+            {placing ? "Placing Order..." : `Place Order — ${formatPrice(grandTotal)}`}
           </Button>
         </div>
 
         <p className="text-xs text-center text-muted-foreground">
-          Cash on Delivery • Free Shipping
+          Cash on Delivery • {formatPrice(FREE_DELIVERY_THRESHOLD)}+ پر Free Delivery
         </p>
       </div>
     </div>
