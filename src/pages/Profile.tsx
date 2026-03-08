@@ -42,9 +42,11 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 const Profile = () => {
   const { user, isLoading, signOut } = useAuth();
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -55,6 +57,9 @@ const Profile = () => {
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [loadingGallery, setLoadingGallery] = useState(true);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
