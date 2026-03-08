@@ -2,9 +2,11 @@ import { Search, Mic, ChevronRight, PhoneCall } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import BottomNav from "@/components/BottomNav";
+import AdminEditButton from "@/components/AdminEditButton";
 import { useState, useEffect } from "react";
 import * as Icons from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 
 interface DbProduct {
@@ -39,6 +41,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = useIsAdmin();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -88,6 +91,9 @@ const Index = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {isAdmin && (
+              <AdminEditButton to="/admin" label="Admin Panel" />
+            )}
             <button onClick={() => navigate("/contact")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
               <PhoneCall size={18} className="text-primary-foreground" />
             </button>
@@ -190,6 +196,10 @@ const Index = () => {
 
       {/* Categories */}
       <div className="px-4 py-2">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-bold text-foreground">Categories</span>
+          {isAdmin && <AdminEditButton to="/admin/categories" label="Edit Categories" />}
+        </div>
         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => setSelectedCategory(null)}
@@ -225,14 +235,17 @@ const Index = () => {
           <h2 className="text-base font-bold text-foreground">
             {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "All Products"}
           </h2>
-          <span className="text-xs text-muted-foreground">{filtered.length} items</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">{filtered.length} items</span>
+            {isAdmin && <AdminEditButton to="/admin/products" label="Edit Products" />}
+          </div>
         </div>
         {filtered.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">No products found</p>
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} isAdmin={isAdmin} />
             ))}
           </div>
         )}

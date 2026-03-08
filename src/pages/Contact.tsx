@@ -41,7 +41,7 @@ const Contact = () => {
       setLoading(false);
     };
     fetchData();
-  }, [user]);
+  }, []);
 
   const startEdit = (key: string, value: string) => {
     setEditing(key);

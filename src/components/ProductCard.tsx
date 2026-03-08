@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Star, Pencil } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -16,19 +16,31 @@ interface ProductCardProps {
     category?: string;
     badge?: string;
   };
+  isAdmin?: boolean;
 }
 
 const formatPrice = (price: number) => `PKR ${price.toLocaleString()}`;
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, isAdmin }: ProductCardProps) => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
   return (
     <div
-      className="bg-card rounded-lg shadow-card p-3 flex flex-col cursor-pointer animate-fade-in active:scale-[0.97] transition-transform"
+      className="bg-card rounded-lg shadow-card p-3 flex flex-col cursor-pointer animate-fade-in active:scale-[0.97] transition-transform relative"
       onClick={() => navigate(`/product/${product.id}`)}
     >
+      {isAdmin && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate("/admin/products");
+          }}
+          className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 active:scale-90 transition-all"
+        >
+          <Pencil size={12} className="text-primary" />
+        </button>
+      )}
       <div className="relative bg-secondary rounded-lg p-4 mb-2 flex items-center justify-center aspect-square overflow-hidden">
         {product.badge && (
           <span className="absolute top-2 left-2 gradient-brand text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-md">
