@@ -33,8 +33,7 @@ const Orders = () => {
 
       return ordersData.map((o) => ({ ...o, profile: profileMap.get(o.user_id) || null }));
 
-      if (error) throw error;
-      return data;
+      return ordersData;
     },
   });
 
