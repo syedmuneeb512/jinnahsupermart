@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, LogOut, User, Phone, MapPin, Save, Camera, Package, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, LogOut, User, Phone, MapPin, Save, Camera, Package, ChevronDown, ChevronUp, Store, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import BottomNav from "@/components/BottomNav";
 
@@ -41,9 +42,11 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 const Profile = () => {
   const { user, isLoading, signOut } = useAuth();
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -54,6 +57,9 @@ const Profile = () => {
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [loadingGallery, setLoadingGallery] = useState(true);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -114,6 +120,54 @@ const Profile = () => {
       fetchProfile();
     }
   }, [user]);
+
+  // Fetch mart gallery images
+  const fetchGallery = async () => {
+    setLoadingGallery(true);
+    const { data } = await supabase.storage.from("mart-gallery").list("", { limit: 5, sortBy: { column: "created_at", order: "asc" } });
+    if (data) {
+      const urls = data.map((file) => {
+        const { data: urlData } = supabase.storage.from("mart-gallery").getPublicUrl(file.name);
+        return urlData.publicUrl;
+      });
+      setGalleryImages(urls);
+    }
+    setLoadingGallery(false);
+  };
+
+  useEffect(() => { fetchGallery(); }, []);
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (galleryImages.length >= 5) {
+      toast({ title: "Limit reached", description: "Maximum 5 images allowed.", variant: "destructive" });
+      return;
+    }
+    setUploadingGallery(true);
+    const fileName = `mart-${Date.now()}.${file.name.split(".").pop()}`;
+    const { error } = await supabase.storage.from("mart-gallery").upload(fileName, file);
+    if (error) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Image uploaded!" });
+      await fetchGallery();
+    }
+    setUploadingGallery(false);
+    if (galleryInputRef.current) galleryInputRef.current.value = "";
+  };
+
+  const handleGalleryDelete = async (url: string) => {
+    const fileName = url.split("/").pop();
+    if (!fileName) return;
+    const { error } = await supabase.storage.from("mart-gallery").remove([fileName]);
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Image deleted!" });
+      await fetchGallery();
+    }
+  };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -355,6 +409,60 @@ const Profile = () => {
                 </div>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      {/* About Mart Gallery */}
+      <div className="px-4 mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+            <Store size={20} />
+            About Mart
+          </h2>
+          {isAdmin && galleryImages.length < 5 && (
+            <button
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={uploadingGallery}
+              className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-primary-foreground"
+            >
+              {uploadingGallery ? (
+                <div className="animate-spin w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
+              ) : (
+                <Plus size={18} />
+              )}
+            </button>
+          )}
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleGalleryUpload}
+            className="hidden"
+          />
+        </div>
+
+        {loadingGallery ? (
+          <div className="flex justify-center py-6">
+            <div className="animate-spin w-6 h-6 border-3 border-primary border-t-transparent rounded-full" />
+          </div>
+        ) : galleryImages.length === 0 ? (
+          <p className="text-muted-foreground text-sm text-center py-6">No mart photos yet.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {galleryImages.map((url, idx) => (
+              <div key={idx} className="relative group rounded-xl overflow-hidden aspect-square bg-muted">
+                <img src={url} alt={`Mart photo ${idx + 1}`} className="w-full h-full object-cover" />
+                {isAdmin && (
+                  <button
+                    onClick={() => handleGalleryDelete(url)}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-destructive/80 flex items-center justify-center text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
