@@ -93,7 +93,7 @@ const Contact = () => {
 
       <div className="px-4 py-4">
         <div className="gradient-banner rounded-2xl p-6 text-center">
-          <h2 className="text-2xl font-extrabold text-primary-foreground">Jinna Super Mart</h2>
+          <h2 className="text-2xl font-extrabold text-primary-foreground">Jinnah Super Mart</h2>
           <p className="text-sm text-primary-foreground/80 mt-1">We're here to help you!</p>
         </div>
       </div>
