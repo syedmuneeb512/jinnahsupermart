@@ -21,7 +21,6 @@ const Checkout = () => {
 
   const deliveryFee = totalPrice < FREE_DELIVERY_THRESHOLD ? DELIVERY_FEE : 0;
   const grandTotal = totalPrice + deliveryFee;
-  const { toast } = useToast();
 
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
