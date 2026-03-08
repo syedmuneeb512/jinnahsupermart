@@ -6,8 +6,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, LogOut, User, Phone, MapPin, Save, Camera } from "lucide-react";
+import { ArrowLeft, LogOut, User, Phone, MapPin, Save, Camera, Package, ChevronDown, ChevronUp } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import BottomNav from "@/components/BottomNav";
+
+interface OrderWithItems {
+  id: string;
+  status: string;
+  total: number;
+  created_at: string;
+  shipping_address: string | null;
+  city: string | null;
+  order_items: {
+    quantity: number;
+    price: number;
+    product_id: string;
+    products: { name: string; image: string | null } | null;
+  }[];
+}
+
+const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  pending: { label: "⏳ Pending", variant: "secondary" },
+  confirmed: { label: "✅ Confirmed", variant: "default" },
+  processing: { label: "📦 Processing", variant: "default" },
+  shipped: { label: "🚚 Shipped", variant: "default" },
+  delivered: { label: "✔️ Delivered", variant: "default" },
+  cancelled: { label: "❌ Cancelled", variant: "destructive" },
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const config = statusConfig[status] || { label: status, variant: "outline" as const };
+  return <Badge variant={config.variant} className="text-[10px] px-2 py-0.5">{config.label}</Badge>;
+};
 
 const Profile = () => {
   const { user, isLoading, signOut } = useAuth();
@@ -21,12 +51,49 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [orders, setOrders] = useState<OrderWithItems[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) {
       navigate("/login");
     }
   }, [user, isLoading, navigate]);
+
+  // Fetch orders
+  useEffect(() => {
+    if (user) {
+      const fetchOrders = async () => {
+        setLoadingOrders(true);
+        const { data } = await supabase
+          .from("orders")
+          .select("id, status, total, created_at, shipping_address, city, order_items(quantity, price, product_id, products(name, image))")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (data) {
+          setOrders(data as unknown as OrderWithItems[]);
+        }
+        setLoadingOrders(false);
+      };
+      fetchOrders();
+
+      // Realtime subscription for order status updates
+      const channel = supabase
+        .channel('user-orders')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `user_id=eq.${user.id}`,
+        }, (payload) => {
+          setOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, status: (payload.new as any).status } : o));
+        })
+        .subscribe();
+
+      return () => { supabase.removeChannel(channel); };
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -229,6 +296,67 @@ const Profile = () => {
           <LogOut size={16} className="mr-2" />
           Logout
         </Button>
+      </div>
+
+      {/* My Orders Section */}
+      <div className="px-4 mt-8">
+        <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mb-4">
+          <Package size={20} />
+          My Orders
+        </h2>
+        {loadingOrders ? (
+          <div className="flex justify-center py-6">
+            <div className="animate-spin w-6 h-6 border-3 border-primary border-t-transparent rounded-full" />
+          </div>
+        ) : orders.length === 0 ? (
+          <p className="text-muted-foreground text-sm text-center py-6">You haven't placed any orders yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {orders.map((order) => {
+              const isExpanded = expandedOrder === order.id;
+              return (
+                <div key={order.id} className="border border-border rounded-xl overflow-hidden bg-card">
+                  <button
+                    onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                    className="w-full px-4 py-3 flex items-center justify-between text-left"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs text-muted-foreground font-mono">
+                          #{order.id.slice(0, 8).toUpperCase()}
+                        </span>
+                        <StatusBadge status={order.status} />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(order.created_at).toLocaleDateString("en-PK", { day: "numeric", month: "short", year: "numeric" })}
+                        {" · "}Rs. {order.total.toLocaleString()}
+                      </p>
+                    </div>
+                    {isExpanded ? <ChevronUp size={18} className="text-muted-foreground" /> : <ChevronDown size={18} className="text-muted-foreground" />}
+                  </button>
+                  {isExpanded && (
+                    <div className="px-4 pb-4 border-t border-border pt-3 space-y-2">
+                      {order.city && <p className="text-xs text-muted-foreground">📍 {order.city}{order.shipping_address ? `, ${order.shipping_address}` : ""}</p>}
+                      <div className="space-y-2">
+                        {order.order_items.map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-3">
+                            {item.products?.image && (
+                              <img src={item.products.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-muted" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">{item.products?.name || "Product"}</p>
+                              <p className="text-xs text-muted-foreground">Qty: {item.quantity} · Rs. {item.price.toLocaleString()}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <BottomNav />
