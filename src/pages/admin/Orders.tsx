@@ -16,7 +16,7 @@ const Orders = () => {
         .from("orders")
         .select(`
           *,
-          order_items(id, quantity, price, product_id)
+          order_items(id, quantity, price, product_id, products(name))
         `)
         .order("created_at", { ascending: false });
 
