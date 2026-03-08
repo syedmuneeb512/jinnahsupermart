@@ -66,7 +66,7 @@ const Contact = () => {
   const whatsappNum = settings.whatsapp.replace(/[^0-9]/g, "");
 
   const contactItems = [
-    { key: "whatsapp", label: "WhatsApp", icon: MessageCircle, iconBg: "bg-[hsl(142,70%,45%)]", iconColor: "text-primary-foreground", href: `https://wa.me/${whatsappNum}` },
+    { key: "whatsapp", label: "WhatsApp", icon: MessageCircle, iconBg: "bg-[hsl(142,70%,45%)]", iconColor: "text-primary-foreground", href: `https://wa.me/${whatsappNum}?text=${encodeURIComponent("Hello Jinnah Super Mart! I need help.")}` },
     { key: "phone", label: "Call Us", icon: Phone, iconBg: "bg-primary", iconColor: "text-primary-foreground", href: `tel:${settings.phone}` },
     { key: "email", label: "Email", icon: Mail, iconBg: "bg-accent", iconColor: "text-accent-foreground", href: `mailto:${settings.email}` },
     { key: "address", label: "Address", icon: MapPin, iconBg: "bg-secondary", iconColor: "text-secondary-foreground" },
