@@ -38,6 +38,7 @@ const Index = () => {
   const [categories, setCategories] = useState<DbCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
