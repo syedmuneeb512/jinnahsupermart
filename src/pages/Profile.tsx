@@ -47,6 +47,40 @@ const Profile = () => {
     }
   }, [user, isLoading, navigate]);
 
+  // Fetch orders
+  useEffect(() => {
+    if (user) {
+      const fetchOrders = async () => {
+        setLoadingOrders(true);
+        const { data } = await supabase
+          .from("orders")
+          .select("id, status, total, created_at, shipping_address, city, order_items(quantity, price, product_id, products(name, image))")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (data) {
+          setOrders(data as unknown as OrderWithItems[]);
+        }
+        setLoadingOrders(false);
+      };
+      fetchOrders();
+
+      // Realtime subscription for order status updates
+      const channel = supabase
+        .channel('user-orders')
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `user_id=eq.${user.id}`,
+        }, (payload) => {
+          setOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, status: (payload.new as any).status } : o));
+        })
+        .subscribe();
+
+      return () => { supabase.removeChannel(channel); };
+    }
+  }, [user]);
+
   useEffect(() => {
     if (user) {
       const fetchProfile = async () => {
