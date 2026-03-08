@@ -105,7 +105,9 @@ const Orders = () => {
                       return (
                         <tr key={order.id} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
                           <td className="py-3 px-4 font-medium text-foreground">{customerName}</td>
+                          <td className="py-3 px-4 text-muted-foreground">{(order as any).email || "-"}</td>
                           <td className="py-3 px-4 text-muted-foreground">{order.phone || "-"}</td>
+                          <td className="py-3 px-4 text-muted-foreground">{(order as any).city || "-"}</td>
                           <td className="py-3 px-4 text-muted-foreground max-w-[200px] truncate">{order.shipping_address || "-"}</td>
                           <td className="py-3 px-4 text-foreground max-w-[250px]">
                             {productNames || <span className="text-muted-foreground">No items</span>}
