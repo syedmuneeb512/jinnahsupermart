@@ -57,22 +57,9 @@ const Cart = () => {
                 <h3 className="text-sm font-bold text-foreground truncate">
                   {product.name}
                 </h3>
-                <div className="flex items-center gap-0.5 mt-0.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={10}
-                      className={
-                        i < product.rating
-                          ? "text-yellow-400 fill-yellow-400"
-                          : "text-muted"
-                      }
-                    />
-                  ))}
-                  <span className="text-[10px] text-muted-foreground ml-0.5">
-                    ({product.reviews})
-                  </span>
-                </div>
+                <p className="text-sm font-extrabold text-primary mt-0.5">
+                  {formatPrice(product.price)}
+                </p>
                 <p className="text-sm font-extrabold text-primary mt-0.5">
                   {formatPrice(product.price)}
                 </p>
