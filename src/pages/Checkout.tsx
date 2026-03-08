@@ -272,12 +272,12 @@ const Checkout = () => {
             className="w-full gradient-brand text-primary-foreground py-6 text-sm font-bold"
           >
             <CreditCard size={18} className="mr-2" />
-            {placing ? "Placing Order..." : `Place Order — ${formatPrice(totalPrice)}`}
+            {placing ? "Placing Order..." : `Place Order — ${formatPrice(grandTotal)}`}
           </Button>
         </div>
 
         <p className="text-xs text-center text-muted-foreground">
-          Cash on Delivery • Free Shipping
+          Cash on Delivery • {formatPrice(FREE_DELIVERY_THRESHOLD)}+ پر Free Delivery
         </p>
       </div>
     </div>
