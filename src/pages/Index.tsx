@@ -1,4 +1,5 @@
-import { Search, Mic, ChevronRight } from "lucide-react";
+import { Search, Mic, ChevronRight, PhoneCall } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import BottomNav from "@/components/BottomNav";
 import { useState, useEffect } from "react";
@@ -37,6 +38,7 @@ const Index = () => {
   const [categories, setCategories] = useState<DbCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -86,9 +88,9 @@ const Index = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <a href="https://wa.me/923106522033" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-[hsl(142,70%,45%)] flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
-              <Icons.MessageCircle size={18} className="text-primary-foreground" />
-            </a>
+            <button onClick={() => navigate("/contact")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
+              <PhoneCall size={18} className="text-primary-foreground" />
+            </button>
             <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />

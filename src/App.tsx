@@ -21,6 +21,7 @@ import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
 import ResetPassword from "./pages/ResetPassword";
 import CategoriesPage from "./pages/CategoriesPage";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/categories" element={<CategoriesPage />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/login" element={<Login />} />
               <Route path="/profile" element={<Profile />} />
