@@ -465,6 +465,20 @@ const Profile = () => {
             ))}
           </div>
         )}
+
+        {/* Mart Info */}
+        <div className="mt-4 bg-card rounded-xl p-4 shadow-card space-y-2">
+          <div className="flex items-center gap-2 text-sm text-foreground">
+            <User size={15} className="text-primary" />
+            <span className="font-semibold">Owner:</span>
+            <span className="text-muted-foreground">Muhammad Muneeb</span>
+          </div>
+          <div className="flex items-start gap-2 text-sm text-foreground">
+            <MapPin size={15} className="text-primary mt-0.5" />
+            <span className="font-semibold">Location:</span>
+            <span className="text-muted-foreground">Jinnah Super Mart, Main Bazar, Pakistan</span>
+          </div>
+        </div>
       </div>
 
       <BottomNav />
