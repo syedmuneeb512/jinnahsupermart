@@ -8,6 +8,7 @@ import * as Icons from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
+import adminPanelIcon from "@/assets/admin-panel-icon.png";
 import { toast } from "@/hooks/use-toast";
 
 interface DbProduct {
