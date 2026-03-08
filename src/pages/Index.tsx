@@ -253,7 +253,10 @@ const Index = () => {
                       <p className="text-sm text-primary-foreground/90 mt-1 whitespace-pre-line">
                         {banner.subtitle}
                       </p>
-                      <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
+                      <button
+                        onClick={() => navigate("/categories")}
+                        className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1"
+                      >
                         {banner.button} <ChevronRight size={14} />
                       </button>
                     </>
