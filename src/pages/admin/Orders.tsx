@@ -80,7 +80,9 @@ const Orders = () => {
                   <thead>
                     <tr className="border-b border-border">
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Customer</th>
+                      <th className="text-left py-3 px-4 text-muted-foreground font-medium">Email</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Phone</th>
+                      <th className="text-left py-3 px-4 text-muted-foreground font-medium">City</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Address</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Products</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Total</th>
@@ -103,7 +105,9 @@ const Orders = () => {
                       return (
                         <tr key={order.id} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
                           <td className="py-3 px-4 font-medium text-foreground">{customerName}</td>
+                          <td className="py-3 px-4 text-muted-foreground">{(order as any).email || "-"}</td>
                           <td className="py-3 px-4 text-muted-foreground">{order.phone || "-"}</td>
+                          <td className="py-3 px-4 text-muted-foreground">{(order as any).city || "-"}</td>
                           <td className="py-3 px-4 text-muted-foreground max-w-[200px] truncate">{order.shipping_address || "-"}</td>
                           <td className="py-3 px-4 text-foreground max-w-[250px]">
                             {productNames || <span className="text-muted-foreground">No items</span>}
