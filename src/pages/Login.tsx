@@ -119,16 +119,18 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <div className="w-16 h-16 gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <ShoppingBag className="text-primary-foreground" size={32} />
+          <div className="w-20 h-20 gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
+            <ShoppingBag className="text-primary-foreground" size={36} />
           </div>
-          <h1 className="text-2xl font-extrabold text-foreground">JINNAH SUPER MART</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-2xl font-black tracking-wide text-foreground uppercase" style={{ letterSpacing: '0.08em' }}>
+            Jinnah <span className="text-primary">Super</span> Mart
+          </h1>
+          <p className="text-sm font-medium text-muted-foreground mt-2 tracking-wide">
             {isForgotPassword
               ? "Reset your password"
               : isSignUp
               ? "Create your account"
-              : "Welcome back"}
+              : "Welcome back 👋"}
           </p>
         </div>
 
