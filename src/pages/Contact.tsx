@@ -25,7 +25,7 @@ const Contact = () => {
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
   const [settings, setSettings] = useState<SettingsMap>(defaultSettings);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [editing, setEditing] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [loading, setLoading] = useState(true);
