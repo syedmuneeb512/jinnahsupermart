@@ -28,7 +28,7 @@ const Dashboard = () => {
     },
   });
 
-  const { data: recentOrders } = useQuery({
+  const { data: recentOrders, refetch: refetchOrders } = useQuery({
     queryKey: ["admin-recent-orders"],
     queryFn: async () => {
       const { data: ordersData } = await supabase
