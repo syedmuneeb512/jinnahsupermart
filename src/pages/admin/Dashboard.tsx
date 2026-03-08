@@ -33,7 +33,7 @@ const Dashboard = () => {
     queryFn: async () => {
       const { data: ordersData } = await supabase
         .from("orders")
-        .select("id, total, status, created_at, user_id")
+        .select(`*, order_items(id, quantity, price, product_id, products(name))`)
         .order("created_at", { ascending: false })
         .limit(5);
 
@@ -49,13 +49,29 @@ const Dashboard = () => {
 
       return ordersData.map((o) => {
         const p = profileMap.get(o.user_id);
+        const items = (o.order_items as any[]) || [];
         return {
           ...o,
           customer: p?.display_name || [p?.first_name, p?.last_name].filter(Boolean).join(" ") || "Unknown",
+          productNames: items.map((i: any) => `${i.products?.name || "Unknown"} ×${i.quantity}`).join(", "),
+          itemCount: items.reduce((sum: number, i: any) => sum + i.quantity, 0),
         };
       });
     },
   });
+
+  const updateStatus = async (orderId: string, status: string) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ status })
+      .eq("id", orderId);
+    if (error) {
+      sonnerToast.error("Failed to update status");
+    } else {
+      sonnerToast.success("Status updated");
+      refetchOrders();
+    }
+  };
 
   const statCards = [
     { label: "Total Revenue", value: `PKR ${(stats?.revenue || 0).toLocaleString()}`, icon: DollarSign },
