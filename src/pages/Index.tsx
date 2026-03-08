@@ -1,4 +1,4 @@
-import { Search, Mic, ChevronRight, PhoneCall } from "lucide-react";
+import { Search, Mic, ChevronRight, PhoneCall, Pencil, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import BottomNav from "@/components/BottomNav";
@@ -8,6 +8,7 @@ import * as Icons from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface DbProduct {
   id: string;
@@ -27,9 +28,34 @@ interface DbCategory {
   icon: string | null;
 }
 
+interface BannerData {
+  title: string;
+  subtitle: string;
+  button: string;
+}
+
+const defaultBanners: BannerData[] = [
+  { title: "Jinnah Super Mart", subtitle: "Quality products\nat best prices", button: "Shop Now" },
+  { title: "Grocery Deals", subtitle: "Up to 30% OFF\non daily essentials", button: "Shop Now" },
+  { title: "Electronics Sale", subtitle: "Save up to PKR 20,000\non gadgets", button: "Shop Now" },
+  { title: "Free Delivery", subtitle: "On orders above\nPKR 2,000", button: "Order Now" },
+];
+
+const bannerStyles = [
+  { className: "gradient-banner", icon: "ShoppingCart" },
+  { style: { background: "linear-gradient(135deg, hsl(140 60% 38%), hsl(160 70% 42%))" }, icon: "ShoppingBasket" },
+  { style: { background: "linear-gradient(135deg, hsl(340 80% 55%), hsl(10 90% 60%))" }, icon: "Smartphone" },
+  { style: { background: "linear-gradient(135deg, hsl(260 60% 50%), hsl(280 70% 55%))" }, icon: "Truck" },
+];
+
 const CategoryIcon = ({ iconName }: { iconName: string }) => {
   const Icon = (Icons as any)[iconName];
   return Icon ? <Icon size={24} /> : null;
+};
+
+const BannerIcon = ({ iconName }: { iconName: string }) => {
+  const Icon = (Icons as any)[iconName];
+  return Icon ? <Icon size={80} className="text-primary-foreground" /> : null;
 };
 
 const Index = () => {
@@ -39,6 +65,9 @@ const Index = () => {
   const [products, setProducts] = useState<DbProduct[]>([]);
   const [categories, setCategories] = useState<DbCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [banners, setBanners] = useState<BannerData[]>(defaultBanners);
+  const [editingBanner, setEditingBanner] = useState<number | null>(null);
+  const [editValues, setEditValues] = useState<BannerData>({ title: "", subtitle: "", button: "" });
   const { user } = useAuth();
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
@@ -64,15 +93,59 @@ const Index = () => {
 
   useEffect(() => {
     const fetchShopData = async () => {
-      const [prodRes, catRes] = await Promise.all([
+      const [prodRes, catRes, settingsRes] = await Promise.all([
         supabase.from("products").select("*").order("created_at", { ascending: false }),
         supabase.from("categories").select("id, name, icon").order("name"),
+        supabase.from("store_settings").select("key, value"),
       ]);
       if (prodRes.data) setProducts(prodRes.data);
       if (catRes.data) setCategories(catRes.data);
+
+      if (settingsRes.data) {
+        const settings = Object.fromEntries(settingsRes.data.map(s => [s.key, s.value]));
+        const loaded = defaultBanners.map((def, i) => ({
+          title: settings[`banner_${i}_title`] || def.title,
+          subtitle: settings[`banner_${i}_subtitle`] || def.subtitle,
+          button: settings[`banner_${i}_button`] || def.button,
+        }));
+        setBanners(loaded);
+      }
     };
     fetchShopData();
   }, []);
+
+  const startEditBanner = (index: number) => {
+    setEditingBanner(index);
+    setEditValues({ ...banners[index] });
+  };
+
+  const saveBanner = async (index: number) => {
+    const keys = [
+      { key: `banner_${index}_title`, value: editValues.title },
+      { key: `banner_${index}_subtitle`, value: editValues.subtitle },
+      { key: `banner_${index}_button`, value: editValues.button },
+    ];
+
+    for (const item of keys) {
+      const { data: existing } = await supabase
+        .from("store_settings")
+        .select("id")
+        .eq("key", item.key)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase.from("store_settings").update({ value: item.value }).eq("key", item.key);
+      } else {
+        await supabase.from("store_settings").insert({ key: item.key, value: item.value });
+      }
+    }
+
+    const updated = [...banners];
+    updated[index] = { ...editValues };
+    setBanners(updated);
+    setEditingBanner(null);
+    toast({ title: "Banner updated!" });
+  };
 
   const filtered = products.filter((p) => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
@@ -128,69 +201,74 @@ const Index = () => {
       {/* Banner Carousel */}
       <div className="px-4 py-3">
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
-          {/* Card 1 - JSmart */}
-          <div className="gradient-banner rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start">
-            <div className="relative z-10">
-              <h2 className="text-xl font-extrabold text-primary-foreground">Jinnah Super Mart</h2>
-              <p className="text-sm text-primary-foreground/90 mt-1">
-                Quality products<br />at best prices
-              </p>
-              <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
-                Shop Now <ChevronRight size={14} />
-              </button>
-            </div>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
-              <Icons.ShoppingCart size={80} className="text-primary-foreground" />
-            </div>
-          </div>
+          {banners.map((banner, i) => {
+            const style = bannerStyles[i] || bannerStyles[0];
+            const isEditing = editingBanner === i;
 
-          {/* Card 2 - Grocery Deals */}
-          <div className="rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start" style={{ background: "linear-gradient(135deg, hsl(140 60% 38%), hsl(160 70% 42%))" }}>
-            <div className="relative z-10">
-              <h2 className="text-xl font-extrabold text-primary-foreground">Grocery Deals</h2>
-              <p className="text-sm text-primary-foreground/90 mt-1">
-                Up to 30% OFF<br />on daily essentials
-              </p>
-              <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
-                Shop Now <ChevronRight size={14} />
-              </button>
-            </div>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
-              <Icons.ShoppingBasket size={80} className="text-primary-foreground" />
-            </div>
-          </div>
+            return (
+              <div
+                key={i}
+                className={`rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start ${style.className || ""}`}
+                style={style.style}
+              >
+                <div className="relative z-10">
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <input
+                        value={editValues.title}
+                        onChange={(e) => setEditValues(v => ({ ...v, title: e.target.value }))}
+                        className="w-full bg-white/20 rounded px-2 py-1 text-lg font-extrabold text-primary-foreground placeholder:text-primary-foreground/50 outline-none"
+                        placeholder="Title"
+                      />
+                      <textarea
+                        value={editValues.subtitle}
+                        onChange={(e) => setEditValues(v => ({ ...v, subtitle: e.target.value }))}
+                        className="w-full bg-white/20 rounded px-2 py-1 text-sm text-primary-foreground placeholder:text-primary-foreground/50 outline-none resize-none"
+                        placeholder="Subtitle"
+                        rows={2}
+                      />
+                      <input
+                        value={editValues.button}
+                        onChange={(e) => setEditValues(v => ({ ...v, button: e.target.value }))}
+                        className="w-full bg-white/20 rounded px-2 py-1 text-xs font-bold text-primary-foreground placeholder:text-primary-foreground/50 outline-none"
+                        placeholder="Button text"
+                      />
+                      <button
+                        onClick={() => saveBanner(i)}
+                        className="mt-1 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1"
+                      >
+                        <Check size={14} /> Save
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <h2 className="text-xl font-extrabold text-primary-foreground">{banner.title}</h2>
+                      <p className="text-sm text-primary-foreground/90 mt-1 whitespace-pre-line">
+                        {banner.subtitle}
+                      </p>
+                      <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
+                        {banner.button} <ChevronRight size={14} />
+                      </button>
+                    </>
+                  )}
+                </div>
 
-          {/* Card 3 - Electronics Sale */}
-          <div className="rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start" style={{ background: "linear-gradient(135deg, hsl(340 80% 55%), hsl(10 90% 60%))" }}>
-            <div className="relative z-10">
-              <h2 className="text-xl font-extrabold text-primary-foreground">Electronics Sale</h2>
-              <p className="text-sm text-primary-foreground/90 mt-1">
-                Save up to PKR 20,000<br />on gadgets
-              </p>
-              <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
-                Shop Now <ChevronRight size={14} />
-              </button>
-            </div>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
-              <Icons.Smartphone size={80} className="text-primary-foreground" />
-            </div>
-          </div>
+                {/* Admin edit pencil */}
+                {isAdmin && !isEditing && (
+                  <button
+                    onClick={() => startEditBanner(i)}
+                    className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 active:scale-90 transition-all"
+                  >
+                    <Pencil size={14} className="text-primary-foreground" />
+                  </button>
+                )}
 
-          {/* Card 4 - Free Delivery */}
-          <div className="rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start" style={{ background: "linear-gradient(135deg, hsl(260 60% 50%), hsl(280 70% 55%))" }}>
-            <div className="relative z-10">
-              <h2 className="text-xl font-extrabold text-primary-foreground">Free Delivery</h2>
-              <p className="text-sm text-primary-foreground/90 mt-1">
-                On orders above<br />PKR 2,000
-              </p>
-              <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
-                Order Now <ChevronRight size={14} />
-              </button>
-            </div>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
-              <Icons.Truck size={80} className="text-primary-foreground" />
-            </div>
-          </div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
+                  <BannerIcon iconName={style.icon} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
