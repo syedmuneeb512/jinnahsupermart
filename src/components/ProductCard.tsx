@@ -1,10 +1,26 @@
 import { Star } from "lucide-react";
-import { Product, formatPrice } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const ProductCard = ({ product }: { product: Product }) => {
+interface ProductCardProps {
+  product: {
+    id: string | number;
+    name: string;
+    price: number;
+    image: string | null;
+    rating?: number | null;
+    description?: string | null;
+    original_price?: number | null;
+    stock?: number;
+    category?: string;
+    badge?: string;
+  };
+}
+
+const formatPrice = (price: number) => `PKR ${price.toLocaleString()}`;
+
+const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
@@ -19,18 +35,22 @@ const ProductCard = ({ product }: { product: Product }) => {
             {product.badge}
           </span>
         )}
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-contain"
-        />
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-contain"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No Image</div>
+        )}
       </div>
       <h3 className="text-sm font-semibold text-foreground truncate">{product.name}</h3>
       <p className="text-xs font-bold text-primary mt-0.5">{formatPrice(product.price)}</p>
       <button
         onClick={(e) => {
           e.stopPropagation();
-          addToCart(product);
+          addToCart(product as any);
           toast.success(`${product.name} added to cart`);
         }}
         className="mt-2 text-xs font-semibold gradient-brand text-primary-foreground py-1.5 rounded-md hover:opacity-90 active:scale-95 transition-all"

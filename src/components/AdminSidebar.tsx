@@ -1,4 +1,4 @@
-import { BarChart3, Package, ShoppingCart, Users, LogOut, Home } from "lucide-react";
+import { BarChart3, Package, ShoppingCart, Users, LogOut, Home, FolderOpen } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
@@ -9,6 +9,7 @@ const AdminSidebar = () => {
 
   const links = [
     { label: "Dashboard", icon: BarChart3, path: "/admin" },
+    { label: "Categories", icon: FolderOpen, path: "/admin/categories" },
     { label: "Products", icon: Package, path: "/admin/products" },
     { label: "Orders", icon: ShoppingCart, path: "/admin/orders" },
     { label: "Users", icon: Users, path: "/admin/users" },
