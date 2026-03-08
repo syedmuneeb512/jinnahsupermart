@@ -141,6 +141,31 @@ const Profile = () => {
 
   useEffect(() => { fetchGallery(); }, []);
 
+  // Fetch mart info from store_settings
+  useEffect(() => {
+    const fetchMartInfo = async () => {
+      const { data } = await supabase.from("store_settings").select("key, value").in("key", ["mart_owner_name", "mart_location"]);
+      if (data) {
+        data.forEach((row) => {
+          if (row.key === "mart_owner_name") setMartOwner(row.value);
+          if (row.key === "mart_location") setMartLocation(row.value);
+        });
+      }
+    };
+    fetchMartInfo();
+  }, []);
+
+  const handleSaveMartInfo = async () => {
+    setSavingMartInfo(true);
+    await Promise.all([
+      supabase.from("store_settings").update({ value: martOwner }).eq("key", "mart_owner_name"),
+      supabase.from("store_settings").update({ value: martLocation }).eq("key", "mart_location"),
+    ]);
+    setSavingMartInfo(false);
+    setEditingMartInfo(false);
+    toast({ title: "Mart info updated!" });
+  };
+
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
