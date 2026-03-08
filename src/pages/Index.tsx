@@ -114,23 +114,72 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Banner */}
+      {/* Banner Carousel */}
       <div className="px-4 py-3">
-        <div className="gradient-banner rounded-xl p-5 relative overflow-hidden">
-          <div className="relative z-10">
-            <h2 className="text-xl font-extrabold text-primary-foreground">Big Sale!</h2>
-            <p className="text-sm text-primary-foreground/90 mt-1">
-              Get 50% OFF<br />on electronics
-            </p>
-            <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
-              Shop Now <ChevronRight size={14} />
-            </button>
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+          {/* Card 1 - JSmart */}
+          <div className="gradient-banner rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start">
+            <div className="relative z-10">
+              <h2 className="text-xl font-extrabold text-primary-foreground">JSmart Store</h2>
+              <p className="text-sm text-primary-foreground/90 mt-1">
+                Your one-stop shop<br />for everything
+              </p>
+              <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
+                Shop Now <ChevronRight size={14} />
+              </button>
+            </div>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
+              <Icons.ShoppingCart size={80} className="text-primary-foreground" />
+            </div>
           </div>
-          <img
-            src="/images/sale-banner.png"
-            alt="Sale"
-            className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-30 mix-blend-overlay"
-          />
+
+          {/* Card 2 - Big Sale */}
+          <div className="rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start" style={{ background: "linear-gradient(135deg, hsl(340 80% 55%), hsl(10 90% 60%))" }}>
+            <div className="relative z-10">
+              <h2 className="text-xl font-extrabold text-primary-foreground">Big Sale!</h2>
+              <p className="text-sm text-primary-foreground/90 mt-1">
+                Get 50% OFF<br />on electronics
+              </p>
+              <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
+                Shop Now <ChevronRight size={14} />
+              </button>
+            </div>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
+              <Icons.Percent size={80} className="text-primary-foreground" />
+            </div>
+          </div>
+
+          {/* Card 3 - New Arrivals */}
+          <div className="rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start" style={{ background: "linear-gradient(135deg, hsl(160 60% 40%), hsl(180 70% 45%))" }}>
+            <div className="relative z-10">
+              <h2 className="text-xl font-extrabold text-primary-foreground">New Arrivals</h2>
+              <p className="text-sm text-primary-foreground/90 mt-1">
+                Fresh styles just<br />dropped this week
+              </p>
+              <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
+                Explore <ChevronRight size={14} />
+              </button>
+            </div>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
+              <Icons.Sparkles size={80} className="text-primary-foreground" />
+            </div>
+          </div>
+
+          {/* Card 4 - Free Delivery */}
+          <div className="rounded-xl p-5 relative overflow-hidden min-w-[85%] snap-start" style={{ background: "linear-gradient(135deg, hsl(260 60% 50%), hsl(280 70% 55%))" }}>
+            <div className="relative z-10">
+              <h2 className="text-xl font-extrabold text-primary-foreground">Free Delivery</h2>
+              <p className="text-sm text-primary-foreground/90 mt-1">
+                On orders above<br />PKR 3,000
+              </p>
+              <button className="mt-3 bg-card text-primary text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 active:scale-95 transition-all flex items-center gap-1">
+                Order Now <ChevronRight size={14} />
+              </button>
+            </div>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
+              <Icons.Truck size={80} className="text-primary-foreground" />
+            </div>
+          </div>
         </div>
       </div>
 
