@@ -140,7 +140,7 @@ const Contact = () => {
 
           if (item.href && !isEditing) {
             return (
-              <a key={item.key} href={item.href} target={item.key === "whatsapp" ? "_blank" : undefined} rel="noopener noreferrer" className="block active:scale-[0.98] transition-transform">
+              <a key={item.key} href={item.href} target="_blank" rel="noopener noreferrer" className="block active:scale-[0.98] transition-transform">
                 {content}
               </a>
             );
