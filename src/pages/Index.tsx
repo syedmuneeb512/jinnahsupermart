@@ -228,7 +228,9 @@ const Index = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
-          <Mic size={18} className="text-muted-foreground" />
+          <button onClick={startVoiceSearch} className="p-1 rounded-full transition-colors" type="button">
+            <Mic size={18} className={isListening ? "text-red-500 animate-pulse" : "text-muted-foreground"} />
+          </button>
         </div>
       </div>
 
