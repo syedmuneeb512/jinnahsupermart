@@ -496,17 +496,43 @@ const Profile = () => {
         )}
 
         {/* Mart Info */}
-        <div className="mt-4 bg-card rounded-xl p-4 shadow-card space-y-2">
-          <div className="flex items-center gap-2 text-sm text-foreground">
-            <User size={15} className="text-primary" />
-            <span className="font-semibold">Owner:</span>
-            <span className="text-muted-foreground">Muhammad Muneeb</span>
-          </div>
-          <div className="flex items-start gap-2 text-sm text-foreground">
-            <MapPin size={15} className="text-primary mt-0.5" />
-            <span className="font-semibold">Location:</span>
-            <span className="text-muted-foreground">Jinnah Super Mart, Main Bazar, Pakistan</span>
-          </div>
+        <div className="mt-4 bg-card rounded-xl p-4 shadow-card space-y-3">
+          {isAdmin && !editingMartInfo && (
+            <button onClick={() => setEditingMartInfo(true)} className="ml-auto block text-primary">
+              <Pencil size={14} />
+            </button>
+          )}
+          {editingMartInfo ? (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Owner Name</Label>
+                <Input value={martOwner} onChange={(e) => setMartOwner(e.target.value)} placeholder="Owner name" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Location</Label>
+                <Input value={martLocation} onChange={(e) => setMartLocation(e.target.value)} placeholder="Mart location" />
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleSaveMartInfo} disabled={savingMartInfo} className="gradient-brand text-primary-foreground">
+                  <Check size={14} className="mr-1" /> {savingMartInfo ? "Saving..." : "Save"}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setEditingMartInfo(false)}>Cancel</Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 text-sm text-foreground">
+                <User size={15} className="text-primary" />
+                <span className="font-semibold">Owner:</span>
+                <span className="text-muted-foreground">{martOwner || "—"}</span>
+              </div>
+              <div className="flex items-start gap-2 text-sm text-foreground">
+                <MapPin size={15} className="text-primary mt-0.5" />
+                <span className="font-semibold">Location:</span>
+                <span className="text-muted-foreground">{martLocation || "—"}</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
