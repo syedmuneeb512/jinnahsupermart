@@ -1,6 +1,8 @@
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, Package, ShoppingCart, Users, TrendingUp, DollarSign } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast as sonnerToast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,12 +28,12 @@ const Dashboard = () => {
     },
   });
 
-  const { data: recentOrders } = useQuery({
+  const { data: recentOrders, refetch: refetchOrders } = useQuery({
     queryKey: ["admin-recent-orders"],
     queryFn: async () => {
       const { data: ordersData } = await supabase
         .from("orders")
-        .select("id, total, status, created_at, user_id")
+        .select(`*, order_items(id, quantity, price, product_id, products(name))`)
         .order("created_at", { ascending: false })
         .limit(5);
 
@@ -47,13 +49,29 @@ const Dashboard = () => {
 
       return ordersData.map((o) => {
         const p = profileMap.get(o.user_id);
+        const items = (o.order_items as any[]) || [];
         return {
           ...o,
           customer: p?.display_name || [p?.first_name, p?.last_name].filter(Boolean).join(" ") || "Unknown",
+          productNames: items.map((i: any) => `${i.products?.name || "Unknown"} ×${i.quantity}`).join(", "),
+          itemCount: items.reduce((sum: number, i: any) => sum + i.quantity, 0),
         };
       });
     },
   });
+
+  const updateStatus = async (orderId: string, status: string) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ status })
+      .eq("id", orderId);
+    if (error) {
+      sonnerToast.error("Failed to update status");
+    } else {
+      sonnerToast.success("Status updated");
+      refetchOrders();
+    }
+  };
 
   const statCards = [
     { label: "Total Revenue", value: `PKR ${(stats?.revenue || 0).toLocaleString()}`, icon: DollarSign },
@@ -114,6 +132,9 @@ const Dashboard = () => {
                   <thead>
                     <tr className="border-b border-border">
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Customer</th>
+                      <th className="text-left py-3 px-4 text-muted-foreground font-medium">Phone</th>
+                      <th className="text-left py-3 px-4 text-muted-foreground font-medium">Address</th>
+                      <th className="text-left py-3 px-4 text-muted-foreground font-medium">Products</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Total</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Date</th>
                       <th className="text-left py-3 px-4 text-muted-foreground font-medium">Status</th>
@@ -123,12 +144,24 @@ const Dashboard = () => {
                     {recentOrders.map((order) => (
                       <tr key={order.id} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
                         <td className="py-3 px-4 font-medium text-foreground">{order.customer}</td>
-                        <td className="py-3 px-4 text-foreground">PKR {Number(order.total).toLocaleString()}</td>
+                        <td className="py-3 px-4 text-muted-foreground">{(order as any).phone || "-"}</td>
+                        <td className="py-3 px-4 text-muted-foreground max-w-[200px] truncate">{(order as any).shipping_address || "-"}</td>
+                        <td className="py-3 px-4 text-foreground max-w-[250px]">
+                          {order.productNames || <span className="text-muted-foreground">No items</span>}
+                        </td>
+                        <td className="py-3 px-4 text-foreground font-medium">PKR {Number(order.total).toLocaleString()}</td>
                         <td className="py-3 px-4 text-muted-foreground">{new Date(order.created_at).toLocaleDateString()}</td>
                         <td className="py-3 px-4">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${getStatusColor(order.status)}`}>
-                            {order.status}
-                          </span>
+                          <Select defaultValue={order.status} onValueChange={(val) => updateStatus(order.id, val)}>
+                            <SelectTrigger className="h-8 w-[130px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["pending", "processing", "shipped", "delivered", "cancelled"].map((s) => (
+                                <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </td>
                       </tr>
                     ))}
