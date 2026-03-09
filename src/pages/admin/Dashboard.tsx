@@ -105,7 +105,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-2xl font-extrabold text-foreground mt-1">{stat.value}</p>
+                    <p className="text-xl md:text-2xl font-extrabold text-foreground mt-1">{stat.value}</p>
                   </div>
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                     <stat.icon size={24} />
