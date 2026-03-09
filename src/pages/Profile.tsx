@@ -269,11 +269,11 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background pb-24 max-w-md mx-auto">
       {/* Header */}
-      <div className="px-4 pt-6 pb-4 flex items-center gap-3">
-        <button onClick={() => navigate("/home")} className="text-foreground">
+      <div className="px-4 pt-6 pb-4 flex items-center gap-3 min-w-0">
+        <button onClick={() => navigate("/home")} className="text-foreground shrink-0">
           <ArrowLeft size={22} />
         </button>
-        <h1 className="text-lg font-bold text-foreground">My Profile</h1>
+        <h1 className="text-lg font-bold text-foreground truncate">My Profile</h1>
       </div>
 
       {/* Avatar section */}
