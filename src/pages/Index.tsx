@@ -185,26 +185,26 @@ const Index = () => {
     <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
       {/* Header */}
       <div className="px-4 pt-6 pb-2">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-base font-semibold text-foreground">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1 pr-1">
+            <p className="text-sm sm:text-base font-semibold text-foreground leading-tight break-words">
               Welcome, {firstName || "there"}!
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 shrink-0">
             {isAdmin && (
               <button
                 onClick={() => navigate("/admin")}
                 title="Admin Panel"
-                className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all"
+                className="px-2.5 sm:px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[11px] sm:text-xs font-semibold whitespace-nowrap hover:opacity-90 active:scale-95 transition-all"
               >
                 Manage
               </button>
             )}
-            <button onClick={() => navigate("/contact")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
-              <PhoneCall size={18} className="text-primary-foreground" />
+            <button onClick={() => navigate("/contact")} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
+              <PhoneCall size={17} className="text-primary-foreground" />
             </button>
-            <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden flex items-center justify-center">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
               ) : (

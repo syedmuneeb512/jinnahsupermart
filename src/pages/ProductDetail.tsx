@@ -61,12 +61,12 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-6 pb-2">
-        <button onClick={() => navigate(-1)} className="p-1">
+      <div className="flex items-center gap-2 px-4 pt-6 pb-2">
+        <button onClick={() => navigate(-1)} className="p-1 shrink-0">
           <ArrowLeft size={22} className="text-foreground" />
         </button>
-        <h1 className="text-base font-bold text-foreground">{product.name}</h1>
-        <div className="flex items-center gap-2">
+        <h1 className="text-sm sm:text-base font-bold text-foreground truncate flex-1">{product.name}</h1>
+        <div className="flex items-center gap-1 shrink-0">
           {isAdmin && <AdminEditButton to="/admin/products" label="Edit Product" />}
           <button className="p-1">
             <MoreVertical size={22} className="text-foreground" />

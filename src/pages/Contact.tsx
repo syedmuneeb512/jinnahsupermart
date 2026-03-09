@@ -83,12 +83,14 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background max-w-md mx-auto pb-8">
-      <div className="px-4 pt-6 pb-4 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-card flex items-center justify-center shadow-card">
-          <ArrowLeft size={18} className="text-foreground" />
-        </button>
-        <h1 className="text-lg font-bold text-foreground">Contact Us</h1>
-        {isAdmin && <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">Admin</span>}
+      <div className="px-4 pt-6 pb-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-3 min-w-0">
+          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-card flex items-center justify-center shadow-card shrink-0">
+            <ArrowLeft size={18} className="text-foreground" />
+          </button>
+          <h1 className="text-lg font-bold text-foreground truncate">Contact Us</h1>
+        </div>
+        {isAdmin && <span className="shrink-0 text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">Admin</span>}
       </div>
 
       <div className="px-4 py-4">

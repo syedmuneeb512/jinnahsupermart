@@ -97,11 +97,11 @@ const CategoriesPage = () => {
 
       {/* Products */}
       <div className="px-4 py-3">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-bold text-foreground">
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <h2 className="text-base font-bold text-foreground truncate pr-2">
             {selectedCat ? selectedCat.name : "All Products"}
           </h2>
-          <span className="text-xs text-muted-foreground">{filtered.length} items</span>
+          <span className="text-xs text-muted-foreground shrink-0">{filtered.length} items</span>
         </div>
         {filtered.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">No products in this category</p>
