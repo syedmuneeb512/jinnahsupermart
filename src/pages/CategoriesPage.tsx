@@ -59,13 +59,15 @@ const CategoriesPage = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
-      <div className="flex items-center gap-3 px-4 pt-6 pb-3">
-        <button onClick={() => navigate("/home")} className="p-1">
-          <ArrowLeft size={22} className="text-foreground" />
-        </button>
-        <h1 className="text-lg font-bold text-foreground">Categories</h1>
+      <div className="px-4 pt-6 pb-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-3 min-w-0">
+          <button onClick={() => navigate("/home")} className="p-1 shrink-0">
+            <ArrowLeft size={22} className="text-foreground" />
+          </button>
+          <h1 className="text-lg font-bold text-foreground truncate">Categories</h1>
+        </div>
         {isAdmin && (
-          <div className="ml-auto">
+          <div className="shrink-0">
             <AdminEditButton to="/admin/categories" label="Edit Categories" />
           </div>
         )}
