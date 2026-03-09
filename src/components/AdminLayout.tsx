@@ -17,7 +17,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           >
             <Menu size={22} className="text-foreground" />
           </button>
-          <h1 className="text-lg font-bold text-foreground">JSM Admin Panel</h1>
+          <h1 className="text-lg font-bold text-primary">JSM Admin Panel</h1>
         </header>
         <main className="flex-1 p-4 md:p-8 overflow-auto">
           {children}
