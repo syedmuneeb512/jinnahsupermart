@@ -151,11 +151,11 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background pb-8 max-w-md mx-auto">
       {/* Header */}
-      <div className="px-4 pt-6 pb-4 flex items-center gap-3">
-        <button onClick={() => navigate("/cart")} className="text-foreground">
+      <div className="px-4 pt-6 pb-4 flex items-center gap-3 min-w-0">
+        <button onClick={() => navigate("/cart")} className="text-foreground shrink-0">
           <ArrowLeft size={22} />
         </button>
-        <h1 className="text-lg font-bold text-foreground">Checkout</h1>
+        <h1 className="text-lg font-bold text-foreground truncate">Checkout</h1>
       </div>
 
       {/* Order Summary */}

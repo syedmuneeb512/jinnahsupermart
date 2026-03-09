@@ -12,12 +12,12 @@ const Cart = () => {
   return (
     <div className="min-h-screen bg-background pb-24 max-w-md mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-6 pb-2">
-        <button onClick={() => navigate(-1)} className="p-1">
+      <div className="flex items-center gap-2 px-4 pt-6 pb-2">
+        <button onClick={() => navigate(-1)} className="p-1 shrink-0">
           <ArrowLeft size={22} className="text-foreground" />
         </button>
-        <h1 className="text-base font-bold text-foreground">Shopping Cart</h1>
-        <div className="relative p-1">
+        <h1 className="text-sm sm:text-base font-bold text-foreground truncate flex-1">Shopping Cart</h1>
+        <div className="relative p-1 shrink-0">
           <ShoppingCart size={22} className="text-primary" />
           {totalItems > 0 && (
             <span className="absolute -top-1 -right-1 gradient-brand text-primary-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
