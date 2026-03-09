@@ -94,7 +94,7 @@ const Dashboard = () => {
     <AdminLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-foreground">Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-1">Welcome back to JSM admin panel</p>
         </div>
 
@@ -105,7 +105,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-2xl font-extrabold text-foreground mt-1">{stat.value}</p>
+                    <p className="text-xl md:text-2xl font-extrabold text-foreground mt-1">{stat.value}</p>
                   </div>
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                     <stat.icon size={24} />
