@@ -43,7 +43,7 @@ const AdminSidebar = ({ open, onClose }: AdminSidebarProps) => {
       >
         <div className="p-6 border-b border-border flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-extrabold text-foreground">JSM Admin</h2>
+            <h2 className="text-xl font-extrabold text-foreground">JSM Admin Panel</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Management Panel</p>
           </div>
           <button
