@@ -1,4 +1,4 @@
-import { BarChart3, Package, ShoppingCart, Users, LogOut, Home, FolderOpen, X } from "lucide-react";
+import { BarChart3, Package, ShoppingCart, Users, LogOut, Home, FolderOpen, X, Zap } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
