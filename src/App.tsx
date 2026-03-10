@@ -16,6 +16,7 @@ import Products from "./pages/admin/Products";
 import Categories from "./pages/admin/Categories";
 import Orders from "./pages/admin/Orders";
 import UsersAdmin from "./pages/admin/UsersAdmin";
+import FlashSales from "./pages/admin/FlashSales";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
