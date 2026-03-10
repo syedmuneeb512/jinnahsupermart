@@ -107,6 +107,8 @@ const Index = () => {
   const [categories, setCategories] = useState<DbCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [banners, setBanners] = useState<BannerData[]>(defaultBanners);
+  const [flashSale, setFlashSale] = useState<FlashSaleData | null>(null);
+  const [countdown, setCountdown] = useState("");
   const [editingBanner, setEditingBanner] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<BannerData>({ title: "", subtitle: "", button: "" });
   const { user } = useAuth();
