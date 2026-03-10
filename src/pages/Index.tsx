@@ -1,4 +1,4 @@
-import { Search, Mic, ChevronRight, PhoneCall, Pencil, Check } from "lucide-react";
+import { Search, Mic, ChevronRight, PhoneCall, Pencil, Check, Zap, Timer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import BottomNav from "@/components/BottomNav";
@@ -27,6 +27,19 @@ interface DbCategory {
   id: string;
   name: string;
   icon: string | null;
+}
+
+interface FlashSaleData {
+  id: string;
+  title: string;
+  description: string | null;
+  end_time: string | null;
+  items: {
+    product: DbProduct;
+    discount_type: string;
+    discount_value: number;
+    sale_price: number;
+  }[];
 }
 
 interface BannerData {
@@ -94,6 +107,8 @@ const Index = () => {
   const [categories, setCategories] = useState<DbCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [banners, setBanners] = useState<BannerData[]>(defaultBanners);
+  const [flashSale, setFlashSale] = useState<FlashSaleData | null>(null);
+  const [countdown, setCountdown] = useState("");
   const [editingBanner, setEditingBanner] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<BannerData>({ title: "", subtitle: "", button: "" });
   const { user } = useAuth();
@@ -141,6 +156,65 @@ const Index = () => {
     };
     fetchShopData();
   }, []);
+
+  // Fetch active flash sale
+  useEffect(() => {
+    const fetchFlashSale = async () => {
+      const now = new Date().toISOString();
+      const { data: sales } = await supabase
+        .from("flash_sales")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (!sales || sales.length === 0) { setFlashSale(null); return; }
+      const sale = sales[0];
+
+      // Check time bounds
+      if (sale.start_time && new Date(sale.start_time) > new Date()) { setFlashSale(null); return; }
+      if (sale.end_time && new Date(sale.end_time) < new Date()) { setFlashSale(null); return; }
+
+      // Fetch items with product details
+      const { data: items } = await supabase
+        .from("flash_sale_items")
+        .select("*, product:products(*)")
+        .eq("flash_sale_id", sale.id);
+
+      if (!items || items.length === 0) { setFlashSale(null); return; }
+
+      const mappedItems = items.map((item: any) => {
+        const salePrice = item.discount_type === "percentage"
+          ? Math.round(item.product.price * (1 - item.discount_value / 100))
+          : item.discount_value;
+        return {
+          product: item.product,
+          discount_type: item.discount_type,
+          discount_value: item.discount_value,
+          sale_price: salePrice,
+        };
+      });
+
+      setFlashSale({ id: sale.id, title: sale.title, description: sale.description, end_time: sale.end_time, items: mappedItems });
+    };
+    fetchFlashSale();
+  }, []);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!flashSale?.end_time) { setCountdown(""); return; }
+    const tick = () => {
+      const diff = new Date(flashSale.end_time!).getTime() - Date.now();
+      if (diff <= 0) { setCountdown("Ended"); return; }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setCountdown(`${h}h ${m}m ${s}s`);
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [flashSale?.end_time]);
 
   const startEditBanner = (index: number) => {
     setEditingBanner(index);
@@ -310,6 +384,54 @@ const Index = () => {
           })}
         </div>
       </div>
+
+      {/* Flash Sale Section */}
+      {flashSale && flashSale.items.length > 0 && (
+        <div className="px-4 py-3">
+          <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(0 85% 55%), hsl(30 95% 55%))" }}>
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Zap size={20} className="text-primary-foreground" />
+                  <h2 className="text-lg font-extrabold text-primary-foreground">{flashSale.title}</h2>
+                </div>
+                {countdown && (
+                  <div className="flex items-center gap-1 bg-black/20 rounded-full px-3 py-1">
+                    <Timer size={12} className="text-primary-foreground" />
+                    <span className="text-xs font-bold text-primary-foreground">{countdown}</span>
+                  </div>
+                )}
+              </div>
+              {flashSale.description && (
+                <p className="text-sm text-primary-foreground/80 mb-3">{flashSale.description}</p>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            {flashSale.items.map(({ product, discount_type, discount_value, sale_price }) => (
+              <div
+                key={product.id}
+                onClick={() => navigate(`/product/${product.id}`)}
+                className="bg-card rounded-xl overflow-hidden shadow-card cursor-pointer hover:shadow-lg transition-shadow relative"
+              >
+                <div className="absolute top-2 left-2 z-10 bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  {discount_type === "percentage" ? `${discount_value}% OFF` : "SALE"}
+                </div>
+                <div className="bg-secondary p-3 flex items-center justify-center h-28">
+                  <img src={product.image || "/placeholder.svg"} alt={product.name} className="h-full object-contain" />
+                </div>
+                <div className="p-3">
+                  <h3 className="text-xs font-bold text-foreground truncate">{product.name}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-sm font-extrabold text-primary">PKR {sale_price.toLocaleString()}</span>
+                    <span className="text-[11px] text-muted-foreground line-through">PKR {product.price.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Categories */}
       <div className="px-4 py-2">
