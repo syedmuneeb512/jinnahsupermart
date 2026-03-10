@@ -60,9 +60,6 @@ const Cart = () => {
                 <p className="text-sm font-extrabold text-primary mt-0.5">
                   {formatPrice(product.price)}
                 </p>
-                <p className="text-sm font-extrabold text-primary mt-0.5">
-                  {formatPrice(product.price)}
-                </p>
               </div>
               <div className="flex items-center gap-1.5 bg-muted rounded-lg">
                 <button
