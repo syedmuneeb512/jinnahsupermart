@@ -1,4 +1,4 @@
-import { Search, Mic, ChevronRight, PhoneCall, Pencil, Check } from "lucide-react";
+import { Search, Mic, ChevronRight, PhoneCall, Pencil, Check, Zap, Timer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import BottomNav from "@/components/BottomNav";
