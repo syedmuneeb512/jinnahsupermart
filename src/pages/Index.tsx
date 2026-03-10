@@ -157,6 +157,65 @@ const Index = () => {
     fetchShopData();
   }, []);
 
+  // Fetch active flash sale
+  useEffect(() => {
+    const fetchFlashSale = async () => {
+      const now = new Date().toISOString();
+      const { data: sales } = await supabase
+        .from("flash_sales")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (!sales || sales.length === 0) { setFlashSale(null); return; }
+      const sale = sales[0];
+
+      // Check time bounds
+      if (sale.start_time && new Date(sale.start_time) > new Date()) { setFlashSale(null); return; }
+      if (sale.end_time && new Date(sale.end_time) < new Date()) { setFlashSale(null); return; }
+
+      // Fetch items with product details
+      const { data: items } = await supabase
+        .from("flash_sale_items")
+        .select("*, product:products(*)")
+        .eq("flash_sale_id", sale.id);
+
+      if (!items || items.length === 0) { setFlashSale(null); return; }
+
+      const mappedItems = items.map((item: any) => {
+        const salePrice = item.discount_type === "percentage"
+          ? Math.round(item.product.price * (1 - item.discount_value / 100))
+          : item.discount_value;
+        return {
+          product: item.product,
+          discount_type: item.discount_type,
+          discount_value: item.discount_value,
+          sale_price: salePrice,
+        };
+      });
+
+      setFlashSale({ id: sale.id, title: sale.title, description: sale.description, end_time: sale.end_time, items: mappedItems });
+    };
+    fetchFlashSale();
+  }, []);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!flashSale?.end_time) { setCountdown(""); return; }
+    const tick = () => {
+      const diff = new Date(flashSale.end_time!).getTime() - Date.now();
+      if (diff <= 0) { setCountdown("Ended"); return; }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setCountdown(`${h}h ${m}m ${s}s`);
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [flashSale?.end_time]);
+
   const startEditBanner = (index: number) => {
     setEditingBanner(index);
     setEditValues({ ...banners[index] });
