@@ -385,6 +385,54 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Flash Sale Section */}
+      {flashSale && flashSale.items.length > 0 && (
+        <div className="px-4 py-3">
+          <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(0 85% 55%), hsl(30 95% 55%))" }}>
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Zap size={20} className="text-primary-foreground" />
+                  <h2 className="text-lg font-extrabold text-primary-foreground">{flashSale.title}</h2>
+                </div>
+                {countdown && (
+                  <div className="flex items-center gap-1 bg-black/20 rounded-full px-3 py-1">
+                    <Timer size={12} className="text-primary-foreground" />
+                    <span className="text-xs font-bold text-primary-foreground">{countdown}</span>
+                  </div>
+                )}
+              </div>
+              {flashSale.description && (
+                <p className="text-sm text-primary-foreground/80 mb-3">{flashSale.description}</p>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            {flashSale.items.map(({ product, discount_type, discount_value, sale_price }) => (
+              <div
+                key={product.id}
+                onClick={() => navigate(`/product/${product.id}`)}
+                className="bg-card rounded-xl overflow-hidden shadow-card cursor-pointer hover:shadow-lg transition-shadow relative"
+              >
+                <div className="absolute top-2 left-2 z-10 bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  {discount_type === "percentage" ? `${discount_value}% OFF` : "SALE"}
+                </div>
+                <div className="bg-secondary p-3 flex items-center justify-center h-28">
+                  <img src={product.image || "/placeholder.svg"} alt={product.name} className="h-full object-contain" />
+                </div>
+                <div className="p-3">
+                  <h3 className="text-xs font-bold text-foreground truncate">{product.name}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-sm font-extrabold text-primary">PKR {sale_price.toLocaleString()}</span>
+                    <span className="text-[11px] text-muted-foreground line-through">PKR {product.price.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Categories */}
       <div className="px-4 py-2">
         <div className="flex items-center justify-between mb-2">
