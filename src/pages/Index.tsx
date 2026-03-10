@@ -29,6 +29,19 @@ interface DbCategory {
   icon: string | null;
 }
 
+interface FlashSaleData {
+  id: string;
+  title: string;
+  description: string | null;
+  end_time: string | null;
+  items: {
+    product: DbProduct;
+    discount_type: string;
+    discount_value: number;
+    sale_price: number;
+  }[];
+}
+
 interface BannerData {
   title: string;
   subtitle: string;
