@@ -76,13 +76,14 @@ const Checkout = () => {
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
+          user_id: user.id,
           total: grandTotal,
           phone: phone.trim(),
           email: email.trim(),
           city: city.trim(),
           shipping_address: address.trim(),
           status: "pending",
-        } as any)
+        })
         .select("id")
         .single();
 
