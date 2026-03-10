@@ -16,6 +16,7 @@ const AdminSidebar = ({ open, onClose }: AdminSidebarProps) => {
     { label: "Dashboard", icon: BarChart3, path: "/admin" },
     { label: "Categories", icon: FolderOpen, path: "/admin/categories" },
     { label: "Products", icon: Package, path: "/admin/products" },
+    { label: "Flash Sales", icon: Zap, path: "/admin/flash-sales" },
     { label: "Orders", icon: ShoppingCart, path: "/admin/orders" },
     { label: "Users", icon: Users, path: "/admin/users" },
   ];
