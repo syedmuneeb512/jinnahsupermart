@@ -388,37 +388,50 @@ const Index = () => {
       {/* Flash Sale Section */}
       {flashSale && flashSale.items.length > 0 && (
         <div className="px-4 py-3">
-          <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(0 85% 55%), hsl(30 95% 55%))" }}>
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-3">
+          {/* Flash Sale Banner */}
+          <div className="rounded-xl overflow-hidden relative" style={{ background: "linear-gradient(135deg, hsl(0 85% 50%), hsl(25 95% 50%), hsl(45 95% 50%))" }}>
+            {/* Shimmer overlay */}
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_2.5s_ease-in-out_infinite]" style={{ background: "linear-gradient(105deg, transparent 40%, hsla(0,0%,100%,0.15) 50%, transparent 60%)" }} />
+            </div>
+            <div className="p-4 relative z-10">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Zap size={20} className="text-primary-foreground" />
-                  <h2 className="text-lg font-extrabold text-primary-foreground">{flashSale.title}</h2>
+                  <span className="text-xl animate-[bounce_1s_ease-in-out_infinite]">🔥</span>
+                  <h2 className="text-lg font-extrabold text-primary-foreground tracking-tight">{flashSale.title}</h2>
+                  <span className="text-xl animate-[bounce_1s_ease-in-out_infinite_0.15s]">🔥</span>
                 </div>
-                {countdown && (
-                  <div className="flex items-center gap-1 bg-black/20 rounded-full px-3 py-1">
-                    <Timer size={12} className="text-primary-foreground" />
-                    <span className="text-xs font-bold text-primary-foreground">{countdown}</span>
+                {countdown && countdown !== "Ended" && (
+                  <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5 animate-pulse">
+                    <Timer size={13} className="text-primary-foreground" />
+                    <span className="text-xs font-bold text-primary-foreground font-mono tracking-wider">{countdown}</span>
                   </div>
                 )}
               </div>
               {flashSale.description && (
-                <p className="text-sm text-primary-foreground/80 mb-3">{flashSale.description}</p>
+                <p className="text-sm text-primary-foreground/85 mb-1">{flashSale.description}</p>
               )}
+              <div className="flex items-center gap-1.5 mt-2">
+                <Zap size={14} className="text-primary-foreground animate-pulse" />
+                <span className="text-[11px] font-semibold text-primary-foreground/90 uppercase tracking-widest">Limited time deals</span>
+              </div>
             </div>
           </div>
+
+          {/* Flash Sale Products */}
           <div className="grid grid-cols-2 gap-3 mt-3">
             {flashSale.items.map(({ product, discount_type, discount_value, sale_price }) => (
               <div
                 key={product.id}
                 onClick={() => navigate(`/product/${product.id}`)}
-                className="bg-card rounded-xl overflow-hidden shadow-card cursor-pointer hover:shadow-lg transition-shadow relative"
+                className="bg-card rounded-xl overflow-hidden shadow-card cursor-pointer hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200 relative group"
               >
-                <div className="absolute top-2 left-2 z-10 bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  {discount_type === "percentage" ? `${discount_value}% OFF` : "SALE"}
+                {/* Discount badge - pulsing */}
+                <div className="absolute top-2 left-2 z-10 bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-md">
+                  {discount_type === "percentage" ? `${discount_value}% OFF` : "🔥 SALE"}
                 </div>
-                <div className="bg-secondary p-3 flex items-center justify-center h-28">
-                  <img src={product.image || "/placeholder.svg"} alt={product.name} className="h-full object-contain" />
+                <div className="bg-secondary p-3 flex items-center justify-center h-28 relative overflow-hidden">
+                  <img src={product.image || "/placeholder.svg"} alt={product.name} className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
                 </div>
                 <div className="p-3">
                   <h3 className="text-xs font-bold text-foreground truncate">{product.name}</h3>
