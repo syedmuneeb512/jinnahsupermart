@@ -266,6 +266,15 @@ const Index = () => {
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {flashSale && (
+              <button
+                onClick={() => document.getElementById("flash-sale-section")?.scrollIntoView({ behavior: "smooth" })}
+                title="Flash Sale"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-destructive flex items-center justify-center hover:opacity-90 active:scale-95 transition-all animate-pulse"
+              >
+                <Zap size={17} className="text-destructive-foreground" fill="currentColor" />
+              </button>
+            )}
             {isAdmin && (
               <button
                 onClick={() => navigate("/admin")}
@@ -387,7 +396,7 @@ const Index = () => {
 
       {/* Flash Sale Section */}
       {flashSale && flashSale.items.length > 0 && (
-        <div className="px-4 py-3">
+        <div id="flash-sale-section" className="px-4 py-3">
           {/* Flash Sale Banner */}
           <div className="rounded-xl overflow-hidden relative" style={{ background: "linear-gradient(135deg, hsl(0 85% 50%), hsl(25 95% 50%), hsl(45 95% 50%))" }}>
             {/* Shimmer overlay */}
