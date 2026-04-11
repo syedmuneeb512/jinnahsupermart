@@ -396,7 +396,7 @@ const Index = () => {
 
       {/* Flash Sale Section */}
       {flashSale && flashSale.items.length > 0 && (
-        <div className="px-4 py-3">
+        <div id="flash-sale-section" className="px-4 py-3">
           {/* Flash Sale Banner */}
           <div className="rounded-xl overflow-hidden relative" style={{ background: "linear-gradient(135deg, hsl(0 85% 50%), hsl(25 95% 50%), hsl(45 95% 50%))" }}>
             {/* Shimmer overlay */}
