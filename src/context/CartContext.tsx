@@ -1,11 +1,17 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export interface CartProduct {
+  /** Unique cart key. For variant items: `${productId}::${variantId}`. Otherwise the product UUID. */
   id: string | number;
+  /** Real DB product UUID (used for order_items). Falls back to `id` if not set. */
+  productId?: string;
   name: string;
   price: number;
   image: string | null;
   description?: string | null;
+  variantId?: string;
+  variantLabel?: string;
+  size?: string;
 }
 
 export interface CartItem {
