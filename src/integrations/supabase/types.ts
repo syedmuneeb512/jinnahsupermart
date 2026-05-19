@@ -233,12 +233,14 @@ export type Database = {
           description: string | null
           id: string
           image: string | null
+          images: Json
           name: string
           original_price: number | null
           price: number
           rating: number | null
           stock: number
           updated_at: string
+          variants: Json
         }
         Insert: {
           category_id?: string | null
@@ -246,12 +248,14 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          images?: Json
           name: string
           original_price?: number | null
           price?: number
           rating?: number | null
           stock?: number
           updated_at?: string
+          variants?: Json
         }
         Update: {
           category_id?: string | null
@@ -259,12 +263,14 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          images?: Json
           name?: string
           original_price?: number | null
           price?: number
           rating?: number | null
           stock?: number
           updated_at?: string
+          variants?: Json
         }
         Relationships: [
           {
