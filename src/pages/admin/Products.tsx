@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Save, Loader2, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, Loader2, Upload, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,7 @@ interface Product {
   original_price: number | null;
   category_id: string | null;
   image: string | null;
+  images: any;
   stock: number;
   rating: number | null;
   created_at: string;
@@ -39,6 +40,7 @@ interface Category {
   name: string;
 }
 
+const MIN_IMAGES = 4;
 const formatPrice = (price: number) => `PKR ${price.toLocaleString()}`;
 
 const Products = () => {
@@ -48,11 +50,11 @@ const Products = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const defaultForm = { name: "", description: "", price: "", original_price: "", category_id: "", stock: "", image: "" };
+  const defaultForm = { name: "", description: "", price: "", original_price: "", category_id: "", stock: "" };
   const [form, setForm] = useState(defaultForm);
 
   const fetchData = async () => {
@@ -61,7 +63,7 @@ const Products = () => {
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("categories").select("id, name").order("name"),
     ]);
-    if (prodRes.data) setProducts(prodRes.data);
+    if (prodRes.data) setProducts(prodRes.data as any);
     if (catRes.data) setCategories(catRes.data);
     setLoading(false);
   };
@@ -76,8 +78,7 @@ const Products = () => {
   const openCreate = () => {
     setEditingId(null);
     setForm(defaultForm);
-    setImageFile(null);
-    setImagePreview(null);
+    setImageUrls([]);
     setDialogOpen(true);
   };
 
@@ -90,21 +91,14 @@ const Products = () => {
       original_price: p.original_price ? String(p.original_price) : "",
       category_id: p.category_id || "",
       stock: String(p.stock),
-      image: p.image || "",
     });
-    setImageFile(null);
-    setImagePreview(p.image || null);
+    const existing = Array.isArray(p.images) ? (p.images as string[]) : [];
+    const merged = existing.length ? existing : (p.image ? [p.image] : []);
+    setImageUrls(merged);
     setDialogOpen(true);
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-  };
-
-  const uploadImage = async (file: File): Promise<string | null> => {
+  const uploadFile = async (file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop();
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error } = await supabase.storage.from("product-images").upload(path, file);
@@ -116,18 +110,38 @@ const Products = () => {
     return data.publicUrl;
   };
 
+  const handleImagesSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    const uploaded: string[] = [];
+    for (const f of files) {
+      const url = await uploadFile(f);
+      if (url) uploaded.push(url);
+    }
+    setImageUrls((prev) => [...prev, ...uploaded]);
+    setUploading(false);
+    e.target.value = "";
+  };
+
+  const removeImage = (idx: number) => {
+    setImageUrls((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const handleSave = async () => {
     if (!form.name.trim() || !form.price) {
       toast({ title: "Name and price are required", variant: "destructive" });
       return;
     }
-    setSaving(true);
-
-    let imageUrl = form.image;
-    if (imageFile) {
-      const uploaded = await uploadImage(imageFile);
-      if (uploaded) imageUrl = uploaded;
+    if (imageUrls.length < MIN_IMAGES) {
+      toast({
+        title: `At least ${MIN_IMAGES} images required`,
+        description: `Please upload ${MIN_IMAGES - imageUrls.length} more image(s).`,
+        variant: "destructive",
+      });
+      return;
     }
+    setSaving(true);
 
     const payload = {
       name: form.name.trim(),
@@ -136,23 +150,18 @@ const Products = () => {
       original_price: form.original_price ? Number(form.original_price) : null,
       category_id: form.category_id || null,
       stock: Number(form.stock) || 0,
-      image: imageUrl || null,
+      image: imageUrls[0],
+      images: imageUrls,
     };
 
     if (editingId) {
       const { error } = await supabase.from("products").update(payload).eq("id", editingId);
-      if (error) {
-        toast({ title: "Error updating product", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "Product updated" });
-      }
+      if (error) toast({ title: "Error updating product", description: error.message, variant: "destructive" });
+      else toast({ title: "Product updated" });
     } else {
       const { error } = await supabase.from("products").insert(payload);
-      if (error) {
-        toast({ title: "Error creating product", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "Product created" });
-      }
+      if (error) toast({ title: "Error creating product", description: error.message, variant: "destructive" });
+      else toast({ title: "Product created" });
     }
     setSaving(false);
     setDialogOpen(false);
@@ -162,12 +171,8 @@ const Products = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this product?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Error deleting product", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Product deleted" });
-      fetchData();
-    }
+    if (error) toast({ title: "Error deleting product", description: error.message, variant: "destructive" });
+    else { toast({ title: "Product deleted" }); fetchData(); }
   };
 
   return (
@@ -290,21 +295,40 @@ const Products = () => {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground">Product Image</label>
-              <div className="mt-1 flex items-center gap-4">
-                {imagePreview && (
-                  <img src={imagePreview} alt="Preview" className="w-16 h-16 rounded-lg object-cover bg-muted" />
-                )}
-                <label className="cursor-pointer flex items-center gap-2 px-4 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-muted transition-colors">
-                  <Upload size={16} />
-                  {imageFile ? "Change" : "Upload"}
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-foreground">
+                  Product Images * <span className="text-muted-foreground font-normal">(min {MIN_IMAGES})</span>
+                </label>
+                <span className={`text-xs font-semibold ${imageUrls.length >= MIN_IMAGES ? "text-green-600" : "text-destructive"}`}>
+                  {imageUrls.length} / {MIN_IMAGES}+
+                </span>
+              </div>
+              <div className="mt-2 grid grid-cols-4 gap-2">
+                {imageUrls.map((url, idx) => (
+                  <div key={url + idx} className="relative group aspect-square">
+                    <img src={url} alt={`img-${idx}`} className="w-full h-full rounded-lg object-cover bg-muted border border-border" />
+                    {idx === 0 && (
+                      <span className="absolute top-1 left-1 text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded">Main</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+                <label className="cursor-pointer aspect-square flex flex-col items-center justify-center gap-1 border-2 border-dashed border-border rounded-lg text-xs text-muted-foreground hover:bg-muted hover:border-primary transition-colors">
+                  {uploading ? <Loader2 size={18} className="animate-spin" /> : <><Upload size={18} /><span>Add</span></>}
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleImagesSelect} disabled={uploading} />
                 </label>
               </div>
+              <p className="text-xs text-muted-foreground mt-2">First image is the main thumbnail. You can select multiple files at once.</p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleSave} disabled={saving} className="gradient-brand text-primary-foreground gap-2">
+              <Button onClick={handleSave} disabled={saving || uploading} className="gradient-brand text-primary-foreground gap-2">
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 {editingId ? "Update" : "Create"}
               </Button>
