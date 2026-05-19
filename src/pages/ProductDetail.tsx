@@ -3,12 +3,23 @@ import { ArrowLeft, MoreVertical, Star, Minus, Plus } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import BottomNav from "@/components/BottomNav";
 import AdminEditButton from "@/components/AdminEditButton";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { cn } from "@/lib/utils";
 
 const formatPrice = (price: number) => `PKR ${price.toLocaleString()}`;
+
+interface Variant {
+  id: string;
+  label: string; // e.g. "Mango" or "Red"
+  size?: string; // e.g. "350ml"
+  price: number;
+  original_price?: number | null;
+  image?: string | null;
+  stock?: number;
+}
 
 interface DbProduct {
   id: string;
@@ -19,6 +30,8 @@ interface DbProduct {
   description: string | null;
   rating: number | null;
   stock: number;
+  images?: string[] | null;
+  variants?: Variant[] | null;
 }
 
 const ProductDetail = () => {
@@ -28,6 +41,8 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState<DbProduct | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const isAdmin = useIsAdmin();
 
   useEffect(() => {
@@ -37,11 +52,45 @@ const ProductDetail = () => {
         .select("*")
         .eq("id", id)
         .single();
-      setProduct(data);
+      setProduct(data as any);
       setLoading(false);
     };
     if (id) fetchProduct();
   }, [id]);
+
+  // Normalize gallery & variants (with demo fallbacks so the UI is meaningful even before data is filled in)
+  const gallery = useMemo<string[]>(() => {
+    if (!product) return [];
+    const raw = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+    if (raw.length > 0) return raw;
+    return product.image ? [product.image] : [];
+  }, [product]);
+
+  const variants = useMemo<Variant[]>(() => {
+    if (!product) return [];
+    const raw = Array.isArray(product.variants) ? product.variants : [];
+    return raw.filter((v) => v && v.id);
+  }, [product]);
+
+  // Group variants by label (flavor/color/type) and by size for two-row chips
+  const labels = useMemo(() => Array.from(new Set(variants.map((v) => v.label).filter(Boolean))), [variants]);
+  const sizes = useMemo(() => Array.from(new Set(variants.map((v) => v.size).filter(Boolean) as string[])), [variants]);
+
+  useEffect(() => {
+    if (variants.length > 0 && !selectedVariantId) {
+      setSelectedVariantId(variants[0].id);
+    }
+  }, [variants, selectedVariantId]);
+
+  const selectedVariant = variants.find((v) => v.id === selectedVariantId) || null;
+
+  // When variant changes, swap main image if variant has one
+  useEffect(() => {
+    if (selectedVariant?.image) {
+      const idx = gallery.indexOf(selectedVariant.image);
+      if (idx >= 0) setActiveImageIdx(idx);
+    }
+  }, [selectedVariant, gallery]);
 
   if (loading) {
     return (
@@ -53,10 +102,40 @@ const ProductDetail = () => {
 
   if (!product) return <div className="p-8 text-center text-foreground">Product not found</div>;
 
-  const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) addToCart(product);
-    toast.success(`${product.name} added to cart`);
+  const displayPrice = selectedVariant?.price ?? product.price;
+  const displayOriginal = selectedVariant?.original_price ?? product.original_price;
+  const displayStock = selectedVariant?.stock ?? product.stock;
+  const mainImage = gallery[activeImageIdx] ?? selectedVariant?.image ?? product.image;
+
+  const pickVariantByLabelSize = (label?: string, size?: string) => {
+    const match = variants.find(
+      (v) => (label ? v.label === label : true) && (size ? v.size === size : true)
+    );
+    if (match) setSelectedVariantId(match.id);
   };
+
+  const handleAddToCart = () => {
+    const cartItem = {
+      id: selectedVariant ? `${product.id}::${selectedVariant.id}` : product.id,
+      productId: product.id,
+      name: selectedVariant
+        ? `${product.name}${selectedVariant.label ? " - " + selectedVariant.label : ""}${selectedVariant.size ? " (" + selectedVariant.size + ")" : ""}`
+        : product.name,
+      price: displayPrice,
+      image: mainImage,
+      description: product.description,
+      variantId: selectedVariant?.id,
+      variantLabel: selectedVariant?.label,
+      size: selectedVariant?.size,
+    };
+    for (let i = 0; i < quantity; i++) addToCart(cartItem);
+    toast.success(`${cartItem.name} added to cart`);
+  };
+
+  const discountPct =
+    displayOriginal && displayOriginal > displayPrice
+      ? Math.round(((displayOriginal - displayPrice) / displayOriginal) * 100)
+      : 0;
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
@@ -74,20 +153,56 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Product Image */}
+      {/* Main Image */}
       <div className="px-4 py-2">
-        <div className="relative bg-card rounded-2xl p-6 shadow-card flex items-center justify-center aspect-square animate-scale-in">
-          {product.image ? (
-            <img src={product.image} alt={product.name} className="w-4/5 h-4/5 object-contain" />
+        <div className="relative bg-card rounded-2xl p-6 shadow-card flex items-center justify-center aspect-square animate-scale-in overflow-hidden">
+          {mainImage ? (
+            <img
+              key={mainImage}
+              src={mainImage}
+              alt={product.name}
+              className="w-4/5 h-4/5 object-contain animate-fade-in"
+            />
           ) : (
             <div className="text-muted-foreground">No Image</div>
+          )}
+          {discountPct > 0 && (
+            <span className="absolute top-3 left-3 bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-1 rounded-full">
+              -{discountPct}%
+            </span>
           )}
         </div>
       </div>
 
+      {/* Thumbnails */}
+      {gallery.length > 1 && (
+        <div className="px-4 pb-2">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {gallery.map((img, i) => (
+              <button
+                key={img + i}
+                onClick={() => setActiveImageIdx(i)}
+                className={cn(
+                  "w-16 h-16 shrink-0 rounded-lg border-2 bg-card p-1 transition-all",
+                  activeImageIdx === i ? "border-primary scale-105" : "border-border opacity-70"
+                )}
+              >
+                <img src={img} alt={`thumb-${i}`} className="w-full h-full object-contain" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Info */}
       <div className="px-4 py-3 animate-slide-up">
         <h2 className="text-xl font-bold text-foreground">{product.name}</h2>
+        {selectedVariant && (
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {selectedVariant.label}
+            {selectedVariant.size ? ` · ${selectedVariant.size}` : ""}
+          </p>
+        )}
         {product.rating != null && (
           <div className="flex items-center gap-1 mt-1">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -100,13 +215,75 @@ const ProductDetail = () => {
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-4">
-          <div>
-            <p className="text-xl font-extrabold text-foreground">{formatPrice(product.price)}</p>
-            {product.original_price && (
-              <p className="text-sm text-muted-foreground line-through">{formatPrice(product.original_price)}</p>
-            )}
+        {/* Price */}
+        <div className="flex items-end gap-2 mt-3">
+          <p className="text-2xl font-extrabold text-primary">{formatPrice(displayPrice)}</p>
+          {displayOriginal && displayOriginal > displayPrice && (
+            <p className="text-sm text-muted-foreground line-through mb-1">
+              {formatPrice(displayOriginal)}
+            </p>
+          )}
+        </div>
+
+        {/* Variant: Flavor / Color / Type */}
+        {labels.length > 0 && (
+          <div className="mt-4">
+            <p className="text-xs font-semibold text-muted-foreground mb-2">
+              Flavor / Color: <span className="text-foreground">{selectedVariant?.label}</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {labels.map((label) => {
+                const active = selectedVariant?.label === label;
+                return (
+                  <button
+                    key={label}
+                    onClick={() => pickVariantByLabelSize(label, selectedVariant?.size)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all active:scale-95",
+                      active
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card text-foreground hover:border-primary/50"
+                    )}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+        )}
+
+        {/* Variant: Size */}
+        {sizes.length > 0 && (
+          <div className="mt-4">
+            <p className="text-xs font-semibold text-muted-foreground mb-2">
+              Size: <span className="text-foreground">{selectedVariant?.size}</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {sizes.map((size) => {
+                const active = selectedVariant?.size === size;
+                return (
+                  <button
+                    key={size}
+                    onClick={() => pickVariantByLabelSize(selectedVariant?.label, size)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all active:scale-95",
+                      active
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card text-foreground hover:border-primary/50"
+                    )}
+                  >
+                    {size}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Quantity */}
+        <div className="flex items-center justify-between mt-5">
+          <span className="text-sm font-semibold text-foreground">Quantity</span>
           <div className="flex items-center gap-3 bg-card rounded-lg border border-border">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -128,7 +305,8 @@ const ProductDetail = () => {
         <div className="flex gap-3 mt-5">
           <button
             onClick={handleAddToCart}
-            className="flex-1 py-3 rounded-xl border-2 border-primary text-primary font-bold text-sm hover:bg-primary/5 active:scale-95 transition-all"
+            disabled={displayStock <= 0}
+            className="flex-1 py-3 rounded-xl border-2 border-primary text-primary font-bold text-sm hover:bg-primary/5 active:scale-95 transition-all disabled:opacity-50"
           >
             Add to Cart
           </button>
@@ -137,7 +315,8 @@ const ProductDetail = () => {
               handleAddToCart();
               navigate("/cart");
             }}
-            className="flex-1 py-3 rounded-xl gradient-brand text-primary-foreground font-bold text-sm hover:opacity-90 active:scale-95 transition-all"
+            disabled={displayStock <= 0}
+            className="flex-1 py-3 rounded-xl gradient-brand text-primary-foreground font-bold text-sm hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
           >
             Buy Now
           </button>
@@ -156,11 +335,11 @@ const ProductDetail = () => {
         {/* Stock */}
         <div className="mt-4">
           <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-            product.stock > 10 ? "bg-green-100 text-green-700" :
-            product.stock > 0 ? "bg-yellow-100 text-yellow-700" :
+            displayStock > 10 ? "bg-green-100 text-green-700" :
+            displayStock > 0 ? "bg-yellow-100 text-yellow-700" :
             "bg-red-100 text-red-700"
           }`}>
-            {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+            {displayStock > 0 ? `${displayStock} in stock` : "Out of stock"}
           </span>
         </div>
       </div>

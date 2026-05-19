@@ -92,7 +92,7 @@ const Checkout = () => {
       // 2. Create order items
       const orderItems = items.map((item) => ({
         order_id: order.id,
-        product_id: String(item.product.id), // static product id as string for now
+        product_id: String(item.product.productId ?? item.product.id),
         quantity: item.quantity,
         price: item.product.price,
       }));
