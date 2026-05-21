@@ -30,9 +30,20 @@ interface Product {
   category_id: string | null;
   image: string | null;
   images: any;
+  variants: any;
   stock: number;
   rating: number | null;
   created_at: string;
+}
+
+interface Variant {
+  id: string;
+  label: string;      // e.g. flavor / color / type
+  size: string;       // e.g. 180ml, Small, 1kg
+  price: string;
+  original_price: string;
+  stock: string;
+  image: string;      // optional variant image url
 }
 
 interface Category {
