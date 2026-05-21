@@ -188,6 +188,26 @@ const Products = () => {
     }
     setSaving(true);
 
+    // Validate variants if any
+    const cleanVariants = variants
+      .filter((v) => v.label.trim() || v.size.trim() || v.price)
+      .map((v) => ({
+        id: v.id,
+        label: v.label.trim(),
+        size: v.size.trim(),
+        price: Number(v.price) || Number(form.price),
+        original_price: v.original_price ? Number(v.original_price) : null,
+        stock: Number(v.stock) || 0,
+        image: v.image || imageUrls[0],
+      }));
+    for (const v of cleanVariants) {
+      if (!v.price || v.price <= 0) {
+        toast({ title: "Each variant needs a price", variant: "destructive" });
+        setSaving(false);
+        return;
+      }
+    }
+
     const payload = {
       name: form.name.trim(),
       description: form.description.trim() || null,
@@ -197,6 +217,7 @@ const Products = () => {
       stock: Number(form.stock) || 0,
       image: imageUrls[0],
       images: imageUrls,
+      variants: cleanVariants,
     };
 
     if (editingId) {
