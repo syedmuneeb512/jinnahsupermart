@@ -392,6 +392,57 @@ const Products = () => {
               </div>
               <p className="text-xs text-muted-foreground mt-2">First image is the main thumbnail. You can select multiple files at once.</p>
             </div>
+
+            {/* Variants Section */}
+            <div className="border-t border-border pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <label className="text-sm font-medium text-foreground">Variants (Size / Color / Flavor)</label>
+                  <p className="text-xs text-muted-foreground">Optional — let customers pick size or type with its own price.</p>
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={addVariantRow} className="gap-1">
+                  <Plus size={14} /> Add
+                </Button>
+              </div>
+
+              {variants.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic py-3 text-center bg-muted/40 rounded-lg">No variants added.</p>
+              ) : (
+                <div className="space-y-3">
+                  {variants.map((v, idx) => (
+                    <div key={v.id} className="border border-border rounded-lg p-3 space-y-2 bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-muted-foreground">Variant {idx + 1}</span>
+                        <button type="button" onClick={() => removeVariant(v.id)} className="text-destructive hover:opacity-80">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input placeholder="Label (e.g. Mango, Red)" value={v.label} onChange={(e) => updateVariant(v.id, "label", e.target.value)} />
+                        <Input placeholder="Size (e.g. 180ml, M)" value={v.size} onChange={(e) => updateVariant(v.id, "size", e.target.value)} />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Input type="number" placeholder="Price *" value={v.price} onChange={(e) => updateVariant(v.id, "price", e.target.value)} />
+                        <Input type="number" placeholder="Original" value={v.original_price} onChange={(e) => updateVariant(v.id, "original_price", e.target.value)} />
+                        <Input type="number" placeholder="Stock" value={v.stock} onChange={(e) => updateVariant(v.id, "stock", e.target.value)} />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {v.image ? (
+                          <img src={v.image} alt="variant" className="w-12 h-12 rounded object-cover border border-border" />
+                        ) : (
+                          <div className="w-12 h-12 rounded bg-muted border border-dashed border-border flex items-center justify-center text-muted-foreground text-[10px]">No img</div>
+                        )}
+                        <label className="cursor-pointer text-xs text-primary hover:underline">
+                          {v.image ? "Change image" : "Upload variant image"}
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => handleVariantImage(v.id, e.target.files?.[0] || null)} />
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
               <Button onClick={handleSave} disabled={saving || uploading} className="gradient-brand text-primary-foreground gap-2">
