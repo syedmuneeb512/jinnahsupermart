@@ -59,18 +59,21 @@ const ProductDetail = () => {
   }, [id]);
 
   // Normalize gallery & variants (with demo fallbacks so the UI is meaningful even before data is filled in)
-  const gallery = useMemo<string[]>(() => {
-    if (!product) return [];
-    const raw = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
-    if (raw.length > 0) return raw;
-    return product.image ? [product.image] : [];
-  }, [product]);
-
   const variants = useMemo<Variant[]>(() => {
     if (!product) return [];
     const raw = Array.isArray(product.variants) ? product.variants : [];
     return raw.filter((v) => v && v.id);
   }, [product]);
+
+  const gallery = useMemo<string[]>(() => {
+    if (!product) return [];
+    const base = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+    const variantImgs = variants.map((v) => v.image).filter(Boolean) as string[];
+    const all = [...base, ...variantImgs];
+    if (all.length === 0 && product.image) all.push(product.image);
+    // dedupe preserving order
+    return Array.from(new Set(all));
+  }, [product, variants]);
 
   // Group variants by label (flavor/color/type) and by size for two-row chips
   const labels = useMemo(() => Array.from(new Set(variants.map((v) => v.label).filter(Boolean))), [variants]);
