@@ -63,6 +63,7 @@ const Products = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [variants, setVariants] = useState<Variant[]>([]);
   const { toast } = useToast();
 
   const defaultForm = { name: "", description: "", price: "", original_price: "", category_id: "", stock: "" };
