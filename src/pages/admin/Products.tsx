@@ -91,6 +91,7 @@ const Products = () => {
     setEditingId(null);
     setForm(defaultForm);
     setImageUrls([]);
+    setVariants([]);
     setDialogOpen(true);
   };
 
@@ -107,7 +108,39 @@ const Products = () => {
     const existing = Array.isArray(p.images) ? (p.images as string[]) : [];
     const merged = existing.length ? existing : (p.image ? [p.image] : []);
     setImageUrls(merged);
+    const vs = Array.isArray(p.variants) ? (p.variants as any[]) : [];
+    setVariants(
+      vs.map((v) => ({
+        id: v.id || crypto.randomUUID(),
+        label: v.label || "",
+        size: v.size || "",
+        price: v.price != null ? String(v.price) : "",
+        original_price: v.original_price != null ? String(v.original_price) : "",
+        stock: v.stock != null ? String(v.stock) : "",
+        image: v.image || "",
+      }))
+    );
     setDialogOpen(true);
+  };
+
+  const addVariantRow = () => {
+    setVariants((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), label: "", size: "", price: "", original_price: "", stock: "", image: "" },
+    ]);
+  };
+  const updateVariant = (id: string, field: keyof Variant, value: string) => {
+    setVariants((prev) => prev.map((v) => (v.id === id ? { ...v, [field]: value } : v)));
+  };
+  const removeVariant = (id: string) => {
+    setVariants((prev) => prev.filter((v) => v.id !== id));
+  };
+  const handleVariantImage = async (id: string, file: File | null) => {
+    if (!file) return;
+    setUploading(true);
+    const url = await uploadFile(file);
+    setUploading(false);
+    if (url) updateVariant(id, "image", url);
   };
 
   const uploadFile = async (file: File): Promise<string | null> => {
