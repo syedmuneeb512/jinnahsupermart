@@ -4,7 +4,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ShieldOff } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Shield, ShieldOff, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface UserWithRole {
   user_id: string;
@@ -17,7 +28,10 @@ interface UserWithRole {
 const UsersAdmin = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<UserWithRole | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -67,6 +81,26 @@ const UsersAdmin = () => {
     }
   };
 
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { data, error } = await supabase.functions.invoke("delete-user", {
+      body: { target_user_id: deleteTarget.user_id },
+    });
+    setDeleting(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Error",
+        description: error?.message || (data as any)?.error || "Failed to delete user",
+        variant: "destructive",
+      });
+    } else {
+      toast({ title: "User deleted" });
+      setDeleteTarget(null);
+      fetchUsers();
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -94,37 +128,53 @@ const UsersAdmin = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((u) => (
-                      <tr key={u.user_id} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
-                        <td className="py-3 px-4 font-medium text-foreground">
-                          {u.display_name || "Unnamed"}
-                        </td>
-                        <td className="py-3 px-4 text-muted-foreground text-xs font-mono">
-                          {u.user_id.slice(0, 8)}...
-                        </td>
-                        <td className="py-3 px-4 text-muted-foreground">
-                          {new Date(u.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            u.isAdmin ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                          }`}>
-                            {u.isAdmin ? "Admin" : "User"}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => toggleAdmin(u.user_id, u.isAdmin)}
-                            className="gap-1.5 text-xs"
-                          >
-                            {u.isAdmin ? <ShieldOff size={14} /> : <Shield size={14} />}
-                            {u.isAdmin ? "Remove Admin" : "Make Admin"}
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
+                    {users.map((u) => {
+                      const isSelf = currentUser?.id === u.user_id;
+                      return (
+                        <tr key={u.user_id} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
+                          <td className="py-3 px-4 font-medium text-foreground">
+                            {u.display_name || "Unnamed"}
+                            {isSelf && <span className="ml-2 text-xs text-muted-foreground">(you)</span>}
+                          </td>
+                          <td className="py-3 px-4 text-muted-foreground text-xs font-mono">
+                            {u.user_id.slice(0, 8)}...
+                          </td>
+                          <td className="py-3 px-4 text-muted-foreground">
+                            {new Date(u.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                              u.isAdmin ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                            }`}>
+                              {u.isAdmin ? "Admin" : "User"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex gap-2 flex-wrap">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toggleAdmin(u.user_id, u.isAdmin)}
+                                className="gap-1.5 text-xs"
+                              >
+                                {u.isAdmin ? <ShieldOff size={14} /> : <Shield size={14} />}
+                                {u.isAdmin ? "Remove Admin" : "Make Admin"}
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                disabled={isSelf}
+                                onClick={() => setDeleteTarget(u)}
+                                className="gap-1.5 text-xs"
+                              >
+                                <Trash2 size={14} />
+                                Delete
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -132,6 +182,34 @@ const UsersAdmin = () => {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this user?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove{" "}
+              <span className="font-semibold text-foreground">
+                {deleteTarget?.display_name || "this user"}
+              </span>{" "}
+              and all their data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDelete();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };
