@@ -230,13 +230,15 @@ const Profile = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
+    const fileExt = validateImageFile(file);
+    if (!fileExt) return;
+
     setUploadingAvatar(true);
-    const fileExt = file.name.split(".").pop();
     const filePath = `${user.id}/avatar.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(filePath, file, { upsert: true });
+      .upload(filePath, file, { upsert: true, contentType: file.type });
 
     if (uploadError) {
       toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
