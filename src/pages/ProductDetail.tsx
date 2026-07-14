@@ -156,8 +156,11 @@ const ProductDetail = () => {
         </div>
       </div>
 
+      {/* Responsive two-column layout on desktop */}
+      <div className="md:grid md:grid-cols-2 md:gap-8 md:px-6">
+
       {/* Main Image */}
-      <div className="px-4 py-2">
+      <div className="px-4 md:px-0 py-2">
         <div className="relative bg-card rounded-2xl p-6 shadow-card flex items-center justify-center aspect-square animate-scale-in overflow-hidden">
           {mainImage ? (
             <img
