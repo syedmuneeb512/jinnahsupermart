@@ -166,6 +166,30 @@ const Profile = () => {
     toast({ title: "Mart info updated!" });
   };
 
+  const ALLOWED_IMAGE_TYPES: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+  };
+
+  const validateImageFile = (file: File): string | null => {
+    const ext = ALLOWED_IMAGE_TYPES[file.type];
+    if (!ext) {
+      toast({
+        title: "Invalid file type",
+        description: "Only JPG, PNG, WEBP, or GIF images are allowed.",
+        variant: "destructive",
+      });
+      return null;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 5MB per image.", variant: "destructive" });
+      return null;
+    }
+    return ext;
+  };
+
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -173,9 +197,13 @@ const Profile = () => {
       toast({ title: "Limit reached", description: "Maximum 5 images allowed.", variant: "destructive" });
       return;
     }
+    const ext = validateImageFile(file);
+    if (!ext) return;
     setUploadingGallery(true);
-    const fileName = `mart-${Date.now()}.${file.name.split(".").pop()}`;
-    const { error } = await supabase.storage.from("mart-gallery").upload(fileName, file);
+    const fileName = `mart-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("mart-gallery")
+      .upload(fileName, file, { contentType: file.type });
     if (error) {
       toast({ title: "Upload failed", description: error.message, variant: "destructive" });
     } else {
