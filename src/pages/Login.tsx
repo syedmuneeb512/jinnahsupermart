@@ -53,14 +53,15 @@ const Login = () => {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
         if (data.user) {
-          await supabase.from("profiles").update({
+          // Fire-and-forget profile update to avoid blocking navigation
+          void supabase.from("profiles").update({
             first_name: firstName,
             last_name: lastName,
             display_name: `${firstName} ${lastName}`.trim(),
           }).eq("user_id", data.user.id);
         }
-        toast({ title: "Account created!", description: "Check your email to confirm." });
-        navigate("/splash");
+        toast({ title: "Account created!", description: "Welcome!" });
+        navigate("/home", { replace: true });
       }
     } else {
       // Try email or phone login
@@ -98,7 +99,7 @@ const Login = () => {
       if (loginResult?.error) {
         toast({ title: "Error", description: loginResult.error.message, variant: "destructive" });
       } else if (loginResult?.data) {
-        navigate("/splash");
+        navigate("/home", { replace: true });
       }
     }
     setLoading(false);
