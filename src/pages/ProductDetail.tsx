@@ -201,7 +201,7 @@ const ProductDetail = () => {
       )}
 
       {/* Info */}
-      <div className="px-4 py-3 animate-slide-up">
+      <div className="px-4 md:px-0 py-3 animate-slide-up">
         <h2 className="text-xl font-bold text-foreground">{product.name}</h2>
         {selectedVariant && (
           <p className="text-xs text-muted-foreground mt-0.5">
