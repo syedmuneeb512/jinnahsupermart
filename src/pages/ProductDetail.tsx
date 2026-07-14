@@ -350,6 +350,8 @@ const ProductDetail = () => {
         </div>
       </div>
 
+      </div>{/* /grid */}
+
       <BottomNav />
     </div>
   );
