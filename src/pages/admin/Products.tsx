@@ -143,10 +143,31 @@ const Products = () => {
     if (url) updateVariant(id, "image", url);
   };
 
+  const ALLOWED_IMAGE_TYPES: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+  };
+
   const uploadFile = async (file: File): Promise<string | null> => {
-    const ext = file.name.split(".").pop();
+    const ext = ALLOWED_IMAGE_TYPES[file.type];
+    if (!ext) {
+      toast({
+        title: "Invalid file type",
+        description: "Only JPG, PNG, WEBP, or GIF images are allowed.",
+        variant: "destructive",
+      });
+      return null;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 5MB per image.", variant: "destructive" });
+      return null;
+    }
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await supabase.storage.from("product-images").upload(path, file);
+    const { error } = await supabase.storage
+      .from("product-images")
+      .upload(path, file, { contentType: file.type });
     if (error) {
       toast({ title: "Image upload failed", description: error.message, variant: "destructive" });
       return null;
