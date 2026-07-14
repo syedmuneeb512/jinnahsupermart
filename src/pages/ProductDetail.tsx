@@ -182,7 +182,7 @@ const ProductDetail = () => {
 
       {/* Thumbnails */}
       {gallery.length > 1 && (
-        <div className="px-4 pb-2">
+        <div className="px-4 md:px-0 pb-2">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
             {gallery.map((img, i) => (
               <button
