@@ -61,7 +61,7 @@ const Login = () => {
           }).eq("user_id", data.user.id);
         }
         toast({ title: "Account created!", description: "Welcome!" });
-        navigate("/home", { replace: true });
+        navigate("/splash", { replace: true });
       }
     } else {
       // Try email or phone login
@@ -99,7 +99,7 @@ const Login = () => {
       if (loginResult?.error) {
         toast({ title: "Error", description: loginResult.error.message, variant: "destructive" });
       } else if (loginResult?.data) {
-        navigate("/home", { replace: true });
+        navigate("/splash", { replace: true });
       }
     }
     setLoading(false);
