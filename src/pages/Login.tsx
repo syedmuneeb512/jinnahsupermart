@@ -61,7 +61,7 @@ const Login = () => {
           }).eq("user_id", data.user.id);
         }
         toast({ title: "Account created!", description: "Welcome!" });
-        navigate("/home", { replace: true });
+        navigate("/splash", { replace: true });
       }
     } else {
       // Try email or phone login
