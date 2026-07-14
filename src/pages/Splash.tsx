@@ -6,8 +6,8 @@ const Splash = () => {
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setFadeOut(true), 700);
-    const t2 = setTimeout(() => navigate("/home", { replace: true }), 1000);
+    const t1 = setTimeout(() => setFadeOut(true), 300);
+    const t2 = setTimeout(() => navigate("/home", { replace: true }), 500);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [navigate]);
 
