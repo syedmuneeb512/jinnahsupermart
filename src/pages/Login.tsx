@@ -99,7 +99,7 @@ const Login = () => {
       if (loginResult?.error) {
         toast({ title: "Error", description: loginResult.error.message, variant: "destructive" });
       } else if (loginResult?.data) {
-        navigate("/splash");
+        navigate("/home", { replace: true });
       }
     }
     setLoading(false);
