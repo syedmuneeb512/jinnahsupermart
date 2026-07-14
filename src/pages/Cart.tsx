@@ -10,7 +10,7 @@ const Cart = () => {
   const { items, updateQuantity, totalItems, totalPrice } = useCart();
 
   return (
-    <div className="min-h-screen bg-background pb-24 max-w-md mx-auto">
+    <div className="min-h-screen bg-background pb-24 max-w-md md:max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-2 px-4 pt-6 pb-2">
         <button onClick={() => navigate(-1)} className="p-1 shrink-0">

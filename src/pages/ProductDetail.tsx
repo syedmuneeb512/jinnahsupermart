@@ -141,9 +141,9 @@ const ProductDetail = () => {
       : 0;
 
   return (
-    <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
+    <div className="min-h-screen bg-background pb-20 max-w-md md:max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 pt-6 pb-2">
+      <div className="flex items-center gap-2 px-4 md:px-6 pt-6 pb-2">
         <button onClick={() => navigate(-1)} className="p-1 shrink-0">
           <ArrowLeft size={22} className="text-foreground" />
         </button>
@@ -156,8 +156,11 @@ const ProductDetail = () => {
         </div>
       </div>
 
+      {/* Responsive two-column layout on desktop */}
+      <div className="md:grid md:grid-cols-2 md:gap-8 md:px-6">
+
       {/* Main Image */}
-      <div className="px-4 py-2">
+      <div className="px-4 md:px-0 py-2">
         <div className="relative bg-card rounded-2xl p-6 shadow-card flex items-center justify-center aspect-square animate-scale-in overflow-hidden">
           {mainImage ? (
             <img
@@ -179,7 +182,7 @@ const ProductDetail = () => {
 
       {/* Thumbnails */}
       {gallery.length > 1 && (
-        <div className="px-4 pb-2">
+        <div className="px-4 md:px-0 pb-2">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
             {gallery.map((img, i) => (
               <button
@@ -198,7 +201,7 @@ const ProductDetail = () => {
       )}
 
       {/* Info */}
-      <div className="px-4 py-3 animate-slide-up">
+      <div className="px-4 md:px-0 py-3 animate-slide-up">
         <h2 className="text-xl font-bold text-foreground">{product.name}</h2>
         {selectedVariant && (
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -346,6 +349,8 @@ const ProductDetail = () => {
           </span>
         </div>
       </div>
+
+      </div>{/* /grid */}
 
       <BottomNav />
     </div>
