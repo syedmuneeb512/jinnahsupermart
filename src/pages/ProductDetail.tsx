@@ -141,9 +141,9 @@ const ProductDetail = () => {
       : 0;
 
   return (
-    <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
+    <div className="min-h-screen bg-background pb-20 max-w-md md:max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 pt-6 pb-2">
+      <div className="flex items-center gap-2 px-4 md:px-6 pt-6 pb-2">
         <button onClick={() => navigate(-1)} className="p-1 shrink-0">
           <ArrowLeft size={22} className="text-foreground" />
         </button>
