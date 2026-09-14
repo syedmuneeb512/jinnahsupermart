@@ -1,4 +1,5 @@
 import { ArrowLeft, MessageCircle, Mail, Phone, MapPin, Clock, Pencil, Check, X } from "lucide-react";
+import Seo from "@/components/Seo";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,9 +84,14 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background max-w-md mx-auto pb-8">
+      <Seo
+        title="Contact Jinnah Super Mart | Store Info & Support"
+        description="Call, email or visit Jinnah Super Mart. Find our store address, opening hours and customer support contacts for orders and deliveries."
+        path="/contact"
+      />
       <div className="px-4 pt-6 pb-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
-          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-card flex items-center justify-center shadow-card shrink-0">
+          <button aria-label="Go back" onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-card flex items-center justify-center shadow-card shrink-0">
             <ArrowLeft size={18} className="text-foreground" />
           </button>
           <h1 className="text-lg font-bold text-foreground truncate">Contact Us</h1>

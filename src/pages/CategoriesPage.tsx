@@ -7,6 +7,7 @@ import AdminEditButton from "@/components/AdminEditButton";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import * as Icons from "lucide-react";
 import { ArrowLeft } from "lucide-react";
+import Seo from "@/components/Seo";
 
 interface Category {
   id: string;
@@ -59,9 +60,14 @@ const CategoriesPage = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
+      <Seo
+        title="Shop by Category | Jinnah Super Mart"
+        description="Browse Jinnah Super Mart by category: groceries, fresh food, cosmetics, personal care and household essentials, delivered to your door."
+        path="/categories"
+      />
       <div className="px-4 pt-6 pb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
-          <button onClick={() => navigate("/home")} className="p-1 shrink-0">
+          <button aria-label="Go back to home" onClick={() => navigate("/home")} className="p-1 shrink-0">
             <ArrowLeft size={22} className="text-foreground" />
           </button>
           <h1 className="text-lg font-bold text-foreground truncate">Categories</h1>
