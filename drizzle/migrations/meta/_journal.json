@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789419318573,
+      "tag": "0000_harden_order_pricing_and_definer_exec",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789419363389,
+      "tag": "0001_move_has_role_to_private_schema",
+      "breakpoints": true
+    }
+  ]
+}
