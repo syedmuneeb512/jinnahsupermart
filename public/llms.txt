@@ -1,0 +1,9 @@
+# Jinnah Super Mart
+
+> Online grocery and essentials store offering groceries, fresh food, cosmetics, personal care and household products with home delivery.
+
+## Pages
+
+- [Home](/home): Featured products, flash sales and category browsing.
+- [Categories](/categories): Browse the full catalogue by category.
+- [Contact](/contact): Store address, phone, email and opening hours.
