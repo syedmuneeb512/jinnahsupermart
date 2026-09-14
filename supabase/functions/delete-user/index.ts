@@ -35,9 +35,7 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceKey);
 
-    // Verify caller is admin
-    const { data: isAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
-    // has_role self-guards with auth.uid(); use a direct check instead via service role
+    // Verify caller is admin via a direct service-role lookup
     const { data: roleRow } = await admin
       .from("user_roles")
       .select("role")
