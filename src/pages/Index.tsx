@@ -257,8 +257,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
+      <Seo
+        title="Jinnah Super Mart - Online Grocery & Essentials Store"
+        description="Shop groceries, fresh food, cosmetics, personal care and household essentials online at Jinnah Super Mart, with fast home delivery."
+        path="/home"
+      />
       {/* Header */}
       <div className="px-4 pt-6 pb-2">
+        <h1 className="sr-only">Jinnah Super Mart — Quality Groceries and Everyday Essentials</h1>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1 pr-1">
             <p className="text-sm sm:text-base font-semibold text-foreground leading-tight break-words">
@@ -270,6 +276,7 @@ const Index = () => {
               <button
                 onClick={() => document.getElementById("flash-sale-section")?.scrollIntoView({ behavior: "smooth" })}
                 title="Flash Sale"
+                aria-label="Jump to flash sale"
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-destructive flex items-center justify-center hover:opacity-90 active:scale-95 transition-all animate-pulse"
               >
                 <Zap size={17} className="text-destructive-foreground" fill="currentColor" />
@@ -284,12 +291,12 @@ const Index = () => {
                 Manage
               </button>
             )}
-            <button onClick={() => navigate("/contact")} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
+            <button aria-label="Contact Jinnah Super Mart" onClick={() => navigate("/contact")} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
               <PhoneCall size={17} className="text-primary-foreground" />
             </button>
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden flex items-center justify-center">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                <img src={avatarUrl} alt="User profile avatar" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full gradient-brand flex items-center justify-center">
                   <Icons.User size={18} className="text-primary-foreground" />
@@ -311,7 +318,7 @@ const Index = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
-          <button onClick={startVoiceSearch} className="p-1 rounded-full transition-colors" type="button">
+          <button aria-label="Search by voice" onClick={startVoiceSearch} className="p-1 rounded-full transition-colors" type="button">
             <Mic size={18} className={isListening ? "text-red-500 animate-pulse" : "text-muted-foreground"} />
           </button>
         </div>

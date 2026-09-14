@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 const formatPrice = (price: number) => `PKR ${price.toLocaleString()}`;
 import BottomNav from "@/components/BottomNav";
+import Seo from "@/components/Seo";
 import { toast } from "sonner";
 
 const Cart = () => {
