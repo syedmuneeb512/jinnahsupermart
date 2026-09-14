@@ -3,6 +3,7 @@ import { ArrowLeft, MoreVertical, Star, Minus, Plus } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import BottomNav from "@/components/BottomNav";
 import AdminEditButton from "@/components/AdminEditButton";
+import Seo from "@/components/Seo";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -142,15 +143,35 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 max-w-md md:max-w-6xl mx-auto">
+      <Seo
+        title={`${product.name} | Jinnah Super Mart`}
+        description={(product.description || `Buy ${product.name} online at Jinnah Super Mart with fast home delivery and everyday low prices.`).slice(0, 155)}
+        path={`/product/${product.id}`}
+        type="product"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: product.name,
+          image: product.image || undefined,
+          description: product.description || undefined,
+          offers: {
+            "@type": "Offer",
+            price: displayPrice,
+            priceCurrency: "PKR",
+            availability: displayStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            url: `https://jsm01.lovable.app/product/${product.id}`,
+          },
+        }}
+      />
       {/* Header */}
       <div className="flex items-center gap-2 px-4 md:px-6 pt-6 pb-2">
-        <button onClick={() => navigate(-1)} className="p-1 shrink-0">
+        <button aria-label="Go back" onClick={() => navigate(-1)} className="p-1 shrink-0">
           <ArrowLeft size={22} className="text-foreground" />
         </button>
         <h1 className="text-sm sm:text-base font-bold text-foreground truncate flex-1">{product.name}</h1>
         <div className="flex items-center gap-1 shrink-0">
           {isAdmin && <AdminEditButton to="/admin/products" label="Edit Product" />}
-          <button className="p-1">
+          <button aria-label="More options" className="p-1">
             <MoreVertical size={22} className="text-foreground" />
           </button>
         </div>
@@ -292,6 +313,7 @@ const ProductDetail = () => {
           <span className="text-sm font-semibold text-foreground">Quantity</span>
           <div className="flex items-center gap-3 bg-card rounded-lg border border-border">
             <button
+              aria-label="Decrease quantity"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
               className="p-2 text-primary hover:bg-muted rounded-l-lg transition-colors"
             >
@@ -299,6 +321,7 @@ const ProductDetail = () => {
             </button>
             <span className="text-sm font-bold w-6 text-center">{quantity}</span>
             <button
+              aria-label="Increase quantity"
               onClick={() => setQuantity(quantity + 1)}
               className="p-2 text-primary hover:bg-muted rounded-r-lg transition-colors"
             >

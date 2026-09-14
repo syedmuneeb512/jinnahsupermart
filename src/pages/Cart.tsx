@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 const formatPrice = (price: number) => `PKR ${price.toLocaleString()}`;
 import BottomNav from "@/components/BottomNav";
+import Seo from "@/components/Seo";
 import { toast } from "sonner";
 
 const Cart = () => {
@@ -11,9 +12,14 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24 max-w-md md:max-w-5xl mx-auto">
+      <Seo
+        title="Your Cart | Jinnah Super Mart"
+        description="Review the groceries and essentials in your Jinnah Super Mart cart, adjust quantities and continue to checkout for home delivery."
+        path="/cart"
+      />
       {/* Header */}
       <div className="flex items-center gap-2 px-4 pt-6 pb-2">
-        <button onClick={() => navigate(-1)} className="p-1 shrink-0">
+        <button aria-label="Go back" onClick={() => navigate(-1)} className="p-1 shrink-0">
           <ArrowLeft size={22} className="text-foreground" />
         </button>
         <h1 className="text-sm sm:text-base font-bold text-foreground truncate flex-1">Shopping Cart</h1>
@@ -63,6 +69,7 @@ const Cart = () => {
               </div>
               <div className="flex items-center gap-1.5 bg-muted rounded-lg">
                 <button
+                  aria-label={`Decrease quantity of ${product.name}`}
                   onClick={() => updateQuantity(product.id, quantity - 1)}
                   className="p-1.5 text-foreground hover:text-primary transition-colors"
                 >
@@ -70,6 +77,7 @@ const Cart = () => {
                 </button>
                 <span className="text-xs font-bold w-4 text-center">{quantity}</span>
                 <button
+                  aria-label={`Increase quantity of ${product.name}`}
                   onClick={() => updateQuantity(product.id, quantity + 1)}
                   className="p-1.5 text-foreground hover:text-primary transition-colors"
                 >
