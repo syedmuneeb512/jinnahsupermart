@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ShoppingBag, Mail, Phone } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const Login = () => {
   const [emailOrPhone, setEmailOrPhone] = useState("");
@@ -118,6 +119,11 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <Seo
+        title="Sign In | Jinnah Super Mart Customer Portal"
+        description="Sign in or create your Jinnah Super Mart account to shop groceries and essentials online, track orders and get fast home delivery."
+        path="/"
+      />
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <div className="w-20 h-20 gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
@@ -125,6 +131,7 @@ const Login = () => {
           </div>
           <h1 className="text-lg font-black tracking-wide text-foreground uppercase" style={{ letterSpacing: '0.1em' }}>
             Jinnah <span className="text-primary">Super</span> Mart
+            <span className="sr-only"> — Customer Portal</span>
           </h1>
           <div className="text-[10px] font-semibold tracking-[0.3em] uppercase text-muted-foreground mt-1">
             Click · Select · Deliver
