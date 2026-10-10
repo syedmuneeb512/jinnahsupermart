@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import AdminLayout from "@/components/AdminLayout";
 import { Plus, Trash2, Zap, Package, Clock, Edit2 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -182,6 +183,7 @@ const FlashSales = () => {
   const availableProducts = products.filter(p => !existingProductIds.includes(p.id));
 
   return (
+    <AdminLayout>
     <div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
@@ -382,6 +384,7 @@ const FlashSales = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </AdminLayout>
   );
 };
 
