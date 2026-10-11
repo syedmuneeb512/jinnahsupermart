@@ -256,6 +256,11 @@ const Index = () => {
     return matchSearch && matchCategory;
   });
 
+  // Live search suggestions (ignores category filter so users find anything they type)
+  const searchResults = search.trim()
+    ? products.filter((p) => p.name.toLowerCase().includes(search.trim().toLowerCase()))
+    : [];
+
   return (
     <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
       <Seo
