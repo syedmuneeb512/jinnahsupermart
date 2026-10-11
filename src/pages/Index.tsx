@@ -256,6 +256,11 @@ const Index = () => {
     return matchSearch && matchCategory;
   });
 
+  // Live search suggestions (ignores category filter so users find anything they type)
+  const searchResults = search.trim()
+    ? products.filter((p) => p.name.toLowerCase().includes(search.trim().toLowerCase()))
+    : [];
+
   return (
     <div className="min-h-screen bg-background pb-20 max-w-md mx-auto">
       <Seo
@@ -309,7 +314,7 @@ const Index = () => {
       </div>
 
       {/* Search */}
-      <div className="px-4 py-2">
+      <div className="px-4 py-2 relative z-30">
         <div className="flex items-center gap-2 bg-card rounded-xl px-4 py-2.5 shadow-card">
           <Search size={18} className="text-muted-foreground" />
           <input
@@ -319,10 +324,58 @@ const Index = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
+          {search && (
+            <button aria-label="Clear search" onClick={() => setSearch("")} className="p-1 rounded-full transition-colors" type="button">
+              <Icons.X size={16} className="text-muted-foreground" />
+            </button>
+          )}
           <button aria-label="Search by voice" onClick={startVoiceSearch} className="p-1 rounded-full transition-colors" type="button">
             <Mic size={18} className={isListening ? "text-red-500 animate-pulse" : "text-muted-foreground"} />
           </button>
         </div>
+
+        {/* Search suggestions dropdown */}
+        {search.trim() && (
+          <div className="absolute left-4 right-4 top-full mt-1 bg-card rounded-xl shadow-elevated border border-border overflow-hidden">
+            {searchResults.length === 0 ? (
+              <p className="px-4 py-3 text-sm text-muted-foreground">
+                No products found for "{search.trim()}"
+              </p>
+            ) : (
+              <>
+                {searchResults.slice(0, 6).map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      navigate(`/product/${p.id}`);
+                      setSearch("");
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-secondary/50 active:bg-secondary transition-colors text-left border-b border-border last:border-b-0"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center overflow-hidden shrink-0">
+                      <img src={p.image || "/placeholder.svg"} alt={p.name} className="h-full object-contain" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
+                      <p className="text-xs text-muted-foreground">PKR {p.price.toLocaleString()}</p>
+                    </div>
+                    <ChevronRight size={14} className="text-muted-foreground shrink-0" />
+                  </button>
+                ))}
+                {searchResults.length > 6 && (
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById("products-section")?.scrollIntoView({ behavior: "smooth" })}
+                    className="w-full px-4 py-2.5 text-xs font-semibold text-primary hover:bg-secondary/50 transition-colors"
+                  >
+                    View all {searchResults.length} results below
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Banner Carousel */}
@@ -499,7 +552,7 @@ const Index = () => {
       </div>
 
       {/* Products */}
-      <div className="px-4 py-3">
+      <div id="products-section" className="px-4 py-3">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold text-foreground">
             {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "All Products"}
