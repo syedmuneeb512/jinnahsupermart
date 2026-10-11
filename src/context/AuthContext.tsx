@@ -75,7 +75,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Keep the session alive: refresh the token periodically and whenever the
+    // app comes back into focus, so the user stays signed in until they log out.
+    const refreshSession = () => {
+      void supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) void supabase.auth.refreshSession();
+      });
+    };
+    const interval = window.setInterval(refreshSession, 10 * 60 * 1000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refreshSession();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+
+    return () => {
+      subscription.unsubscribe();
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
   }, []);
 
   const signOut = async () => {
