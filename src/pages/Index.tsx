@@ -552,7 +552,7 @@ const Index = () => {
       </div>
 
       {/* Products */}
-      <div className="px-4 py-3">
+      <div id="products-section" className="px-4 py-3">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold text-foreground">
             {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : "All Products"}
