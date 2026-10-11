@@ -1,0 +1,2 @@
+# Architecture rules
+- Keep the homepage's supporting shopping sections in a separate component and reuse the homepage product data; this avoids extra requests and leaves the existing shopping flow unchanged.
