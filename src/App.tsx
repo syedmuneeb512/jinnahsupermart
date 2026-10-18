@@ -31,11 +31,11 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <StorePreloader />
         <CartProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <StorePreloader />
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/splash" element={<Splash />} />

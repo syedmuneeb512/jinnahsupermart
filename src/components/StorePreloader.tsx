@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +9,15 @@ export default function StorePreloader() {
   const client = useQueryClient();
   const { user } = useAuth();
   const userId = user?.id;
+  const { pathname } = useLocation();
+  const previousPath = useRef(pathname);
+
+  useEffect(() => {
+    if (previousPath.current.startsWith("/admin") && !pathname.startsWith("/admin")) {
+      void client.invalidateQueries({ queryKey: ["store"] });
+    }
+    previousPath.current = pathname;
+  }, [client, pathname]);
 
   useEffect(() => {
     preloadStore(client);
