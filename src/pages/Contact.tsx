@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { toast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { settingsQuery } from "@/lib/storeQueries";
 
 interface SettingsMap {
   whatsapp: string;
@@ -28,20 +30,12 @@ const Contact = () => {
   const [settings, setSettings] = useState<SettingsMap>(defaultSettings);
   const [editing, setEditing] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: storeSettings, isPending: loading } = useQuery(settingsQuery());
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { data } = await supabase.from("store_settings").select("key, value");
-      if (data) {
-        const map: any = { ...defaultSettings };
-        data.forEach((row: any) => { map[row.key] = row.value; });
-        setSettings(map);
-      }
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
+    if (storeSettings) setSettings({ ...defaultSettings, ...storeSettings });
+  }, [storeSettings]);
 
   const startEdit = (key: string, value: string) => {
     setEditing(key);
@@ -59,6 +53,8 @@ const Contact = () => {
       toast({ title: "Error", description: "Failed to update", variant: "destructive" });
     } else {
       setSettings((prev) => ({ ...prev, [key]: trimmed }));
+      queryClient.setQueryData(settingsQuery().queryKey, (prev: Record<string, string> | undefined) => ({ ...prev, [key]: trimmed }));
+      void queryClient.invalidateQueries({ queryKey: ["store", "settings"] });
       toast({ title: "Updated!", description: `${key} has been updated.` });
     }
     setEditing(null);

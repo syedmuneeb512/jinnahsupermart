@@ -28,8 +28,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdminLoading, setIsAdminLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const roleCheckId = useRef(0);
+  const checkedUserId = useRef<string | null>(null);
 
   const checkAdminRole = async (userId: string) => {
+    if (checkedUserId.current === userId) return;
+    checkedUserId.current = userId;
     const currentCheck = ++roleCheckId.current;
     setIsAdmin(false);
     setIsAdminLoading(true);
@@ -43,21 +46,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (roleCheckId.current !== currentCheck) return;
     setIsAdmin(!error && !!data);
+    if (error) checkedUserId.current = null;
     setIsAdminLoading(false);
   };
 
   const clearAdminState = () => {
+    checkedUserId.current = null;
     roleCheckId.current += 1;
     setIsAdmin(false);
     setIsAdminLoading(false);
   };
 
   useEffect(() => {
+    let active = true;
+    let authEventReceived = false;
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
+        authEventReceived = true;
         setSession(session);
         if (session?.user) {
-          void checkAdminRole(session.user.id);
+          // Run database work after the auth callback releases its session lock.
+          const userId = session.user.id;
+          window.setTimeout(() => { if (active) void checkAdminRole(userId); }, 0);
         } else {
           clearAdminState();
         }
@@ -66,6 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!active || authEventReceived) return;
       setSession(session);
       if (session?.user) {
         void checkAdminRole(session.user.id);
@@ -75,12 +86,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     });
 
-    // Keep the session alive: refresh the token periodically and whenever the
-    // app comes back into focus, so the user stays signed in until they log out.
+    // The auth client refreshes expiring tokens automatically. getSession also
+    // refreshes when necessary, without forcing a network request on every focus.
     const refreshSession = () => {
-      void supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) void supabase.auth.refreshSession();
-      });
+      void supabase.auth.getSession();
     };
     const interval = window.setInterval(refreshSession, 10 * 60 * 1000);
     const onVisible = () => {
@@ -90,6 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     window.addEventListener("focus", onVisible);
 
     return () => {
+      active = false;
       subscription.unsubscribe();
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);

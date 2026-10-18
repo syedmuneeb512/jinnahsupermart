@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { cn } from "@/lib/utils";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { productsQuery } from "@/lib/storeQueries";
 
 const formatPrice = (price: number) => `PKR ${price.toLocaleString()}`;
 
@@ -40,23 +42,27 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [product, setProduct] = useState<DbProduct | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: product, isPending: loading } = useQuery<DbProduct | null>({
+    queryKey: ["store", "product", id],
+    enabled: !!id,
+    staleTime: 30_000,
+    initialData: () => queryClient.getQueryData(productsQuery().queryKey)?.find(item => item.id === id) as unknown as DbProduct | undefined,
+    initialDataUpdatedAt: () => queryClient.getQueryState(productsQuery().queryKey)?.dataUpdatedAt,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("*").eq("id", id ?? "").maybeSingle();
+      if (error) throw error;
+      return data as unknown as DbProduct | null;
+    },
+  });
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const isAdmin = useIsAdmin();
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", id)
-        .single();
-      setProduct(data as any);
-      setLoading(false);
-    };
-    if (id) fetchProduct();
+    setQuantity(1);
+    setActiveImageIdx(0);
+    setSelectedVariantId(null);
   }, [id]);
 
   // Normalize gallery & variants (with demo fallbacks so the UI is meaningful even before data is filled in)

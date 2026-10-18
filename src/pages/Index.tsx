@@ -12,6 +12,8 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import adminPanelIcon from "@/assets/admin-panel-icon.png";
 import { toast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { productsQuery, categoriesQuery, settingsQuery, profileQuery } from "@/lib/storeQueries";
 
 interface DbProduct {
   id: string;
@@ -103,10 +105,9 @@ const Index = () => {
     recognition.onend = () => setIsListening(false);
     recognition.start();
   }, [isListening]);
-  const [firstName, setFirstName] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [products, setProducts] = useState<DbProduct[]>([]);
-  const [categories, setCategories] = useState<DbCategory[]>([]);
+  const { data: products = [] } = useQuery(productsQuery());
+  const { data: categories = [] } = useQuery(categoriesQuery());
+  const { data: settings } = useQuery(settingsQuery());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [banners, setBanners] = useState<BannerData[]>(defaultBanners);
   const [flashSale, setFlashSale] = useState<FlashSaleData | null>(null);
@@ -117,47 +118,20 @@ const Index = () => {
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
-      const { data } = await supabase
-        .from("profiles")
-        .select("first_name, display_name, avatar_url")
-        .eq("user_id", user.id)
-        .single();
-      if (data?.first_name) {
-        setFirstName(data.first_name);
-      } else if (data?.display_name) {
-        const name = data.display_name.split(" ")[0];
-        setFirstName(name.includes("@") ? "" : name);
-      }
-      setAvatarUrl(data?.avatar_url || null);
-    };
-    fetchProfile();
-  }, [user]);
+  const queryClient = useQueryClient();
+  const { data: profile } = useQuery({ ...profileQuery(user?.id ?? ""), enabled: !!user });
+  const profileName = profile?.display_name?.split(" ")[0] ?? "";
+  const firstName = profile?.first_name || (profileName.includes("@") ? "" : profileName);
+  const avatarUrl = profile?.avatar_url;
 
   useEffect(() => {
-    const fetchShopData = async () => {
-      const [prodRes, catRes, settingsRes] = await Promise.all([
-        supabase.from("products").select("*").order("created_at", { ascending: false }),
-        supabase.from("categories").select("id, name, icon").order("name"),
-        supabase.from("store_settings").select("key, value"),
-      ]);
-      if (prodRes.data) setProducts(prodRes.data);
-      if (catRes.data) setCategories(catRes.data);
-
-      if (settingsRes.data) {
-        const settings = Object.fromEntries(settingsRes.data.map(s => [s.key, s.value]));
-        const loaded = defaultBanners.map((def, i) => ({
-          title: settings[`banner_${i}_title`] || def.title,
-          subtitle: settings[`banner_${i}_subtitle`] || def.subtitle,
-          button: settings[`banner_${i}_button`] || def.button,
-        }));
-        setBanners(loaded);
-      }
-    };
-    fetchShopData();
-  }, []);
+    if (!settings) return;
+    setBanners(defaultBanners.map((def, i) => ({
+      title: settings[`banner_${i}_title`] || def.title,
+      subtitle: settings[`banner_${i}_subtitle`] || def.subtitle,
+      button: settings[`banner_${i}_button`] || def.button,
+    })));
+  }, [settings]);
 
   // Fetch active flash sale
   useEffect(() => {
@@ -248,6 +222,7 @@ const Index = () => {
     updated[index] = { ...editValues };
     setBanners(updated);
     setEditingBanner(null);
+    void queryClient.invalidateQueries({ queryKey: ["store", "settings"] });
     toast({ title: "Banner updated!" });
   };
 
