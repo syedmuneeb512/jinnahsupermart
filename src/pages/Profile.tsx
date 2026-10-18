@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, LogOut, User, Phone, MapPin, Save, Camera, Package, ChevronDown, ChevronUp, Store, Plus, Trash2, Pencil, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import BottomNav from "@/components/BottomNav";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { profileQuery, ordersQuery, settingsQuery, galleryQuery } from "@/lib/storeQueries";
 
 interface OrderWithItems {
   id: string;
@@ -48,18 +50,21 @@ const Profile = () => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
-  const [displayName, setDisplayName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const userId = user?.id ?? "";
+  const { data: profileData, isPending: loadingProfile } = useQuery({ ...profileQuery(userId), enabled: !!userId });
+  const { data: orderData, isPending: loadingOrders } = useQuery({ ...ordersQuery(userId), enabled: !!userId });
+  const { data: galleryData, isPending: loadingGallery } = useQuery(galleryQuery());
+  const { data: storeSettings } = useQuery(settingsQuery());
+  const [displayName, setDisplayName] = useState(() => queryClient.getQueryData(profileQuery(userId).queryKey)?.display_name ?? "");
+  const [phone, setPhone] = useState(() => queryClient.getQueryData(profileQuery(userId).queryKey)?.phone ?? "");
+  const [address, setAddress] = useState(() => queryClient.getQueryData(profileQuery(userId).queryKey)?.address ?? "");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => queryClient.getQueryData(profileQuery(userId).queryKey)?.avatar_url ?? null);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [loadingProfile, setLoadingProfile] = useState(true);
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
-  const [loadingOrders, setLoadingOrders] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
-  const [loadingGallery, setLoadingGallery] = useState(true);
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [martOwner, setMartOwner] = useState("");
   const [martLocation, setMartLocation] = useState("");
@@ -75,20 +80,6 @@ const Profile = () => {
   // Fetch orders
   useEffect(() => {
     if (user) {
-      const fetchOrders = async () => {
-        setLoadingOrders(true);
-        const { data } = await supabase
-          .from("orders")
-          .select("id, status, total, created_at, shipping_address, city, order_items(quantity, price, product_id, products(name, image))")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-        if (data) {
-          setOrders(data as unknown as OrderWithItems[]);
-        }
-        setLoadingOrders(false);
-      };
-      fetchOrders();
-
       // Realtime subscription for order status updates
       const channel = supabase
         .channel('user-orders')
@@ -98,7 +89,7 @@ const Profile = () => {
           table: 'orders',
           filter: `user_id=eq.${user.id}`,
         }, (payload) => {
-          setOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, status: (payload.new as any).status } : o));
+          void queryClient.invalidateQueries({ queryKey: ordersQuery(user.id).queryKey });
         })
         .subscribe();
 
@@ -107,54 +98,24 @@ const Profile = () => {
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      const fetchProfile = async () => {
-        const { data } = await supabase
-          .from("profiles")
-          .select("display_name, phone, address, avatar_url")
-          .eq("user_id", user.id)
-          .single();
-        if (data) {
-          setDisplayName(data.display_name || "");
-          setPhone(data.phone || "");
-          setAddress(data.address || "");
-          setAvatarUrl(data.avatar_url || null);
-        }
-        setLoadingProfile(false);
-      };
-      fetchProfile();
-    }
-  }, [user]);
+    if (!profileData) return;
+    setDisplayName(profileData.display_name || "");
+    setPhone(profileData.phone || "");
+    setAddress(profileData.address || "");
+    setAvatarUrl(profileData.avatar_url || null);
+  }, [profileData]);
 
-  // Fetch mart gallery images
-  const fetchGallery = async () => {
-    setLoadingGallery(true);
-    const { data } = await supabase.storage.from("mart-gallery").list("", { limit: 5, sortBy: { column: "created_at", order: "asc" } });
-    if (data) {
-      const urls = data.map((file) => {
-        const { data: urlData } = supabase.storage.from("mart-gallery").getPublicUrl(file.name);
-        return urlData.publicUrl;
-      });
-      setGalleryImages(urls);
-    }
-    setLoadingGallery(false);
-  };
-
-  useEffect(() => { fetchGallery(); }, []);
-
-  // Fetch mart info from store_settings
+  useEffect(() => { if (orderData) setOrders(orderData as unknown as OrderWithItems[]); }, [orderData]);
+  useEffect(() => { if (galleryData) setGalleryImages(galleryData); }, [galleryData]);
   useEffect(() => {
-    const fetchMartInfo = async () => {
-      const { data } = await supabase.from("store_settings").select("key, value").in("key", ["mart_owner_name", "mart_location"]);
-      if (data) {
-        data.forEach((row) => {
-          if (row.key === "mart_owner_name") setMartOwner(row.value);
-          if (row.key === "mart_location") setMartLocation(row.value);
-        });
-      }
-    };
-    fetchMartInfo();
-  }, []);
+    if (!storeSettings) return;
+    setMartOwner(storeSettings.mart_owner_name || "");
+    setMartLocation(storeSettings.mart_location || "");
+  }, [storeSettings]);
+
+  const fetchGallery = async () => {
+    await queryClient.invalidateQueries({ queryKey: galleryQuery().queryKey });
+  };
 
   const handleSaveMartInfo = async () => {
     setSavingMartInfo(true);
@@ -164,6 +125,7 @@ const Profile = () => {
     ]);
     setSavingMartInfo(false);
     setEditingMartInfo(false);
+    void queryClient.invalidateQueries({ queryKey: settingsQuery().queryKey });
     toast({ title: "Mart info updated!" });
   };
 
@@ -262,6 +224,7 @@ const Profile = () => {
       toast({ title: "Error", description: updateError.message, variant: "destructive" });
     } else {
       setAvatarUrl(publicUrl);
+      void queryClient.invalidateQueries({ queryKey: profileQuery(user.id).queryKey });
       toast({ title: "Avatar updated!" });
     }
     setUploadingAvatar(false);
@@ -277,6 +240,7 @@ const Profile = () => {
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
+      void queryClient.invalidateQueries({ queryKey: profileQuery(user.id).queryKey });
       toast({ title: "Profile updated!" });
     }
     setSaving(false);

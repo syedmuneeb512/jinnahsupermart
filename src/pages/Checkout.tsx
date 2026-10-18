@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { profileQuery, ordersQuery } from "@/lib/storeQueries";
 const formatPrice = (price: number) => `PKR ${price.toLocaleString()}`;
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +20,8 @@ const Checkout = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { items, totalPrice, totalItems, clearCart } = useCart();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: profile } = useQuery({ ...profileQuery(user?.id ?? ""), enabled: !!user });
 
   const deliveryFee = totalPrice < FREE_DELIVERY_THRESHOLD ? DELIVERY_FEE : 0;
   const grandTotal = totalPrice + deliveryFee;
@@ -42,19 +46,12 @@ const Checkout = () => {
     if (user) {
       // Pre-fill email from auth
       setEmail(user.email || "");
-      supabase
-        .from("profiles")
-        .select("phone, address")
-        .eq("user_id", user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data) {
-            setPhone(data.phone || "");
-            setAddress(data.address || "");
-          }
-        });
+      if (profile) {
+        setPhone(profile.phone || "");
+        setAddress(profile.address || "");
+      }
     }
-  }, [user]);
+  }, [user?.id, profile]);
 
   // Redirect if cart empty and no order placed
   useEffect(() => {
@@ -106,6 +103,8 @@ const Checkout = () => {
         .update({ phone: phone.trim(), address: address.trim() })
         .eq("user_id", user.id);
 
+      void queryClient.invalidateQueries({ queryKey: ordersQuery(user.id).queryKey });
+      void queryClient.invalidateQueries({ queryKey: profileQuery(user.id).queryKey });
       setOrderId(order.id);
       setOrderPlaced(true);
       clearCart();
