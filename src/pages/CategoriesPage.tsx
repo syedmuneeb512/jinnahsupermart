@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { productsQuery, categoriesQuery } from "@/lib/storeQueries";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
@@ -34,23 +36,11 @@ const CategoryIcon = ({ iconName }: { iconName: string }) => {
 };
 
 const CategoriesPage = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const { data: categories = [] } = useQuery(categoriesQuery());
+  const { data: products = [] } = useQuery(productsQuery());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
-
-  useEffect(() => {
-    const fetch = async () => {
-      const [catRes, prodRes] = await Promise.all([
-        supabase.from("categories").select("id, name, icon, description").order("name"),
-        supabase.from("products").select("*").order("created_at", { ascending: false }),
-      ]);
-      if (catRes.data) setCategories(catRes.data);
-      if (prodRes.data) setProducts(prodRes.data);
-    };
-    fetch();
-  }, []);
 
   const filtered = selectedId
     ? products.filter((p) => p.category_id === selectedId)
