@@ -48,8 +48,9 @@ export const settingsQuery = () => {
 async function loadSettings() {
   const { data, error } = await supabase.from("store_settings").select("key, value");
   if (error) throw error;
-  savePublicCache("settings", data);
-  return Object.fromEntries(data.map(row => [row.key, row.value])) as Record<string, string>;
+  const settings = Object.fromEntries(data.map(row => [row.key, row.value])) as Record<string, string>;
+  savePublicCache("settings", settings);
+  return settings;
 }
 
 export const profileQuery = (userId: string) => queryOptions({

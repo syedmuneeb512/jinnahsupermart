@@ -23,6 +23,7 @@ import Checkout from "./pages/Checkout";
 import ResetPassword from "./pages/ResetPassword";
 import CategoriesPage from "./pages/CategoriesPage";
 import Contact from "./pages/Contact";
+import StorePreloader from "@/components/StorePreloader";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
+        <StorePreloader />
         <CartProvider>
           <Toaster />
           <Sonner />
