@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -20,6 +21,12 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { session, isLoading: authLoading } = useAuth();
+
+  // Already signed in (e.g. app reopened or returning from Google): skip the login form.
+  useEffect(() => {
+    if (!authLoading && session) navigate("/splash", { replace: true });
+  }, [authLoading, session, navigate]);
 
   const isPhone = (value: string) => /^\+?\d{7,15}$/.test(value.replace(/\s/g, ""));
 
@@ -108,14 +115,17 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
-    const { error } = await lovable.auth.signInWithOAuth("google", {
+    const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
       extraParams: { prompt: "select_account" },
     });
-    if (error) {
-      toast({ title: "Error", description: (error as Error).message, variant: "destructive" });
+    if (result.error) {
+      toast({ title: "Error", description: (result.error as Error).message, variant: "destructive" });
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+    if (result.redirected) return;
+    navigate("/splash", { replace: true });
   };
 
   return (
