@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MoreVertical, Star, Minus, Plus } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import BottomNav from "@/components/BottomNav";
+import ProductCard from "@/components/ProductCard";
 import AdminEditButton from "@/components/AdminEditButton";
 import Seo from "@/components/Seo";
 import { useState, useEffect, useMemo } from "react";
@@ -101,6 +102,18 @@ const ProductDetail = () => {
       if (idx >= 0) setActiveImageIdx(idx);
     }
   }, [selectedVariant, gallery]);
+
+  const { data: allProducts } = useQuery(productsQuery());
+  const related = useMemo(() => {
+    if (!product || !allProducts) return [];
+    const others = allProducts.filter((p) => p.id !== product.id);
+    const catId = (product as unknown as { category_id?: string | null }).category_id;
+    const same = catId ? others.filter((p) => p.category_id === catId) : [];
+    const rest = others.filter((p) => !same.includes(p));
+    return [...same, ...rest].slice(0, 8);
+  }, [product, allProducts]);
+
+  useEffect(() => { window.scrollTo(0, 0); }, [id]);
 
   if (loading) {
     return (
@@ -380,6 +393,17 @@ const ProductDetail = () => {
       </div>
 
       </div>{/* /grid */}
+
+      {related.length > 0 && (
+        <section className="px-4 md:px-6 mt-8 mb-4" aria-labelledby="related-heading">
+          <h3 id="related-heading" className="text-base font-bold text-foreground mb-3">Related Products</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {related.map((p) => (
+              <ProductCard key={p.id} product={p} isAdmin={isAdmin} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <BottomNav />
     </div>
