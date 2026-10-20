@@ -7,3 +7,8 @@
 - [x] Remove redundant authentication refresh requests and repeated role checks.
 - [x] Verify public navigation, reloads, and caching regression tests (4 passed).
 - [ ] Verify signed-in profile and login transition: blocked until the user signs in through the preview; no account matched the requesting user's identity.
+
+# Persistent sign-in and APK Google login
+- [ ] Verify sign-in survives navigation and reopening the app.
+- [ ] Diagnose Google sign-in 404 and verify the hosted Google sign-in entry.
+- [ ] Verify APK Google sign-in: requires the wrapper's loaded website address and Android error details.
