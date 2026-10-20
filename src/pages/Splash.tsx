@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import storeLogo from "@/assets/logo-storefront.png";
 
 const Splash = () => {
   const navigate = useNavigate();
@@ -24,11 +25,11 @@ const Splash = () => {
 
       {/* Logo */}
       <div className="relative z-10 flex flex-col items-center animate-scale-in">
-        <div className="text-7xl font-extrabold tracking-tight text-primary-foreground mb-1">
-          <span className="text-primary-foreground/80">J</span>Smart
+        <div className="rounded-2xl bg-card px-7 py-5 shadow-xl">
+          <img src={storeLogo} alt="Jinnah Super Mart" width={700} height={262} className="h-14 w-auto sm:h-16" />
         </div>
         <div
-          className="text-sm font-semibold tracking-[0.25em] uppercase text-primary-foreground/70 animate-fade-in"
+          className="mt-4 text-sm font-semibold tracking-[0.25em] uppercase text-primary-foreground/70 animate-fade-in"
           style={{ animationDelay: "0.6s", animationFillMode: "both" }}
         >
           Click | Select | Deliver
