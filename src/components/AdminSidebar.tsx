@@ -1,6 +1,7 @@
 import { BarChart3, Package, ShoppingCart, Users, LogOut, Home, FolderOpen, X, Zap } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import storeLogo from "@/assets/logo-storefront.png";
 
 interface AdminSidebarProps {
   open: boolean;
@@ -43,9 +44,9 @@ const AdminSidebar = ({ open, onClose }: AdminSidebarProps) => {
         }`}
       >
         <div className="p-6 border-b border-border flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-extrabold text-primary">JSM Admin Panel</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Management Panel</p>
+          <div className="min-w-0">
+            <img src={storeLogo} alt="Jinnah Super Mart" width={700} height={262} className="h-10 w-auto" />
+            <p className="text-[11px] text-muted-foreground mt-1">Management Panel</p>
           </div>
           <button
             onClick={onClose}
