@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import storeLogo from "@/assets/logo-storefront.png";
 
 const Splash = () => {
   const navigate = useNavigate();
@@ -26,7 +25,9 @@ const Splash = () => {
       {/* Logo */}
       <div className="relative z-10 flex flex-col items-center animate-scale-in">
         <div className="rounded-2xl bg-card px-7 py-5 shadow-xl">
-          <img src={storeLogo} alt="Jinnah Super Mart" width={700} height={262} className="h-14 w-auto sm:h-16" />
+          <h1 className="text-xl font-black tracking-wide uppercase text-foreground sm:text-2xl" style={{ letterSpacing: "0.1em" }}>
+            Jinnah <span className="text-primary">Super</span> Mart
+          </h1>
         </div>
         <div
           className="mt-4 text-sm font-semibold tracking-[0.25em] uppercase text-primary-foreground/70 animate-fade-in"

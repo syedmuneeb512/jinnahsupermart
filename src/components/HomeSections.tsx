@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Pencil } from "lucide-react";
 import essentialsImage from "@/assets/home-essentials.jpg";
-import storeLogo from "@/assets/logo-storefront.png";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { settingsQuery } from "@/lib/storeQueries";
@@ -24,7 +23,7 @@ interface HomeContent {
   essentials: { eyebrow: string; title: string; text: string; image: string; button: string; shelvesTitle: string; showShelves: boolean };
   features: { eyebrow: string; title: string; items: Item[] };
   faq: { eyebrow: string; title: string; items: Item[]; linkText: string };
-  footer: { tagline: string; copyright: string };
+  footer: { name: string; tagline: string; copyright: string };
 }
 
 const SETTINGS_KEY = "home_sections";
@@ -44,7 +43,7 @@ const defaults: HomeContent = {
     { title: "Where can I see my orders?", description: "Open your Profile and select My Orders to view your orders and their latest status." },
     { title: "How can I contact the store?", description: "Visit our Contact page for the store's current contact details and available ways to reach our team." },
   ] },
-  footer: { tagline: "Click · Select · Deliver", copyright: "Jinnah Super Mart" },
+  footer: { name: "Jinnah Super Mart", tagline: "Click · Select · Deliver", copyright: "Jinnah Super Mart" },
 };
 
 const parseContent = (raw?: string): HomeContent => {
@@ -211,7 +210,9 @@ const HomeSections = ({ products }: HomeSectionsProps) => {
       <footer className="bg-primary-dark px-4 py-7 text-primary-foreground">
         <div className="flex items-start justify-between gap-2">
           <Link to="/home" aria-label="Jinnah Super Mart home" className="inline-flex rounded-lg bg-card px-4 py-3">
-            <img src={storeLogo} alt="Jinnah Super Mart" width={700} height={262} loading="lazy" className="h-9 w-auto sm:h-10" />
+            <span className="text-base font-black tracking-wide uppercase text-foreground sm:text-lg" style={{ letterSpacing: "0.08em" }}>
+              Jinnah <span className="text-primary">Super</span> Mart
+            </span>
           </Link>
           {isAdmin && <EditBtn light onClick={() => open("footer")} />}
         </div>
@@ -271,6 +272,7 @@ const HomeSections = ({ products }: HomeSectionsProps) => {
                 <Field label="Contact link text" value={draft.faq.linkText} onChange={v => set("faq", { linkText: v })} />
               </>)}
               {editing === "footer" && (<>
+                <Field label="Store name" value={draft.footer.name} onChange={v => set("footer", { name: v })} />
                 <Field label="Tagline" value={draft.footer.tagline} onChange={v => set("footer", { tagline: v })} />
                 <Field label="Copyright name" value={draft.footer.copyright} onChange={v => set("footer", { copyright: v })} />
               </>)}
