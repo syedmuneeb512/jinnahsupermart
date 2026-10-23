@@ -3,3 +3,4 @@
 - Use shared TanStack Query keys for storefront and user-scoped reads, preload them before navigation, and invalidate after writes; this prevents repeated loading waits while keeping changes visible.
 - Persist only short-lived public catalog data in session storage, never account data; this speeds reloads without exposing another user's profile or orders.
 - Consume admin status from AuthContext and defer database reads outside auth callbacks; this avoids duplicate checks and session-lock contention.
+- The Capacitor APK wrapper must load the published site URL (`capacitor.config.ts` server.url), never a local bundle or dev address; Google sign-in's OAuth redirect chain only resolves on the hosted domain.
