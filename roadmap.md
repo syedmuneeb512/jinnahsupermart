@@ -11,4 +11,5 @@
 # Persistent sign-in and APK Google login
 - [x] Verify restored sign-in survives navigation and reopening the website; no runtime errors during the check.
 - [x] Verify hosted Google sign-in entry: published website reaches accounts.google.com without a 404 (Google account authentication not completed).
-- [ ] Diagnose and verify APK Google sign-in: blocked on the wrapper's loaded website address and a screenshot showing the failing URL; no APK or wrapper configuration is available.
+- [x] Diagnose APK Google sign-in 404: the wrapper was loading a dev/preview address; created capacitor.config.ts pointing the WebView at the published site with allowNavigation for the OAuth chain. User must git pull, run `npx cap sync`, and rebuild the APK to pick it up.
+- [ ] User rebuilds APK from their own repo with the updated capacitor.config.ts and re-tests Continue with Google.
